@@ -10,8 +10,9 @@ NAME = os.getenv("NAME", "doki")
 PORT = os.getenv("PORT", "8000")
 ENDPOINT = os.getenv("ENDPOINT", "http://localhost:8000/submit")
 MAILBOX = os.getenv("MAILBOX", False)
+SEED = os.getenv("SEED", None)
 
-agent = Agent(name=NAME, port=PORT, endpoint=ENDPOINT, mailbox=MAILBOX)
+agent = Agent(name=NAME, port=PORT, seed=SEED, endpoint=ENDPOINT, mailbox=MAILBOX)
 
 
 class Message(Model):
