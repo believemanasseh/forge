@@ -4,6 +4,8 @@ from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from dotenv import load_dotenv
 from uagents import Agent, Context, Model
 
+from src.llm import call_llm
+
 load_dotenv()
 
 NAME = os.getenv("NAME", "doki")
@@ -27,8 +29,12 @@ class Request(Model):
 
 
 class Response(Model):
-    status: str
-    message: str
+    id: str
+    object: str
+    created: int
+    model: str
+    choices: list
+    usage: dict
 
 
 @agent.on_event("startup")
@@ -46,8 +52,16 @@ async def introduce_receiver(ctx: Context):
 @agent.on_rest_post("/chat", Request, Response)
 async def handle_post(ctx: Context, req: Request) -> Response:
     ctx.logger.info(f"Query: {req.query}")
+    res = call_llm(req.query)
     ctx.logger.info(f"{ctx.session_history()} histories")
-    return Response(status="success", message="Received POST request")
+    return Response(
+        id=res["id"],
+        object=res["object"],
+        created=res["created"],
+        model=res["model"],
+        choices=res["choices"],
+        usage=res["usage"],
+    )
 
 
 if __name__ == "__main__":
