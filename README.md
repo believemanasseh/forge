@@ -16,7 +16,7 @@ pipenv install
 Run agent
 
 ```bash
-pipenv run python src/agent.py
+pipenv run python -m src.agent
 ```
 
 ### UI

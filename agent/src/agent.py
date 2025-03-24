@@ -1,44 +1,25 @@
-import os
-
 from cosmpy.aerial.client import LedgerClient, NetworkConfig
-from dotenv import load_dotenv
-from uagents import Agent, Context, Model
+from uagents import Agent, Context
 
+from src.config import get_config
 from src.llm import call_llm
+from src.schemas import Request, Response
 
-load_dotenv()
+config = get_config()
 
-NAME = os.getenv("NAME", "doki")
-PORT = os.getenv("PORT", "8000")
-ENDPOINT = os.getenv("ENDPOINT", "http://localhost:8000/submit")
-MAILBOX = os.getenv("MAILBOX", False)
-SEED = os.getenv("SEED", None)
 
 agent = Agent(
-    name=NAME,
-    port=PORT,
-    seed=SEED,
-    endpoint=ENDPOINT,
-    mailbox=MAILBOX,
+    name=config.NAME,
+    port=config.PORT,
+    seed=config.SEED,
+    endpoint=config.ENDPOINT,
+    mailbox=config.MAILBOX,
     store_message_history=True,
 )
 
 
-class Request(Model):
-    query: str
-
-
-class Response(Model):
-    id: str
-    object: str
-    created: int
-    model: str
-    choices: list
-    usage: dict
-
-
 @agent.on_event("startup")
-async def introduce_receiver(ctx: Context):
+async def handle_startup(ctx: Context):
     ctx.logger.info(
         f"Hello, I'm agent {agent.name} and my address is {agent.address}. My wallet address is {agent.wallet.address()}"
     )
