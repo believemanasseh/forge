@@ -93,7 +93,25 @@ const ChatInterface = () => {
     <div className="md:grid md:grid-cols-[20%_1fr] h-screen w-screen overflow-x-hidden">
       {isMobile ? (
         <div className="m-1">
-          <Hamburger toggled={isOpen} toggle={setOpen} />
+          <div className={`${isOpen && "absolute top-1 left-1 z-11"}`}>
+            <Hamburger toggled={isOpen} toggle={setOpen} hideOutline rounded />
+          </div>
+          {isOpen && (
+            <div className="absolute top-0 left-0 h-screen w-[80%] bg-white shadow-lg z-10">
+              <Dropdown
+                className="m-5 border-none outline-none text-black hover:text-black text-black"
+                menu={menuProps}
+                placement="bottomRight"
+              >
+                <Button className="mt-20 hover:text-black text-black hover:bg-black">
+                  <Space className="hover:text-black">
+                    Options
+                    <DownOutlined />
+                  </Space>
+                </Button>
+              </Dropdown>
+            </div>
+          )}
         </div>
       ) : (
         <div className="border-r border-r-[#ccc] h-screen">
