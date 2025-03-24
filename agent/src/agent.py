@@ -12,11 +12,23 @@ ENDPOINT = os.getenv("ENDPOINT", "http://localhost:8000/submit")
 MAILBOX = os.getenv("MAILBOX", False)
 SEED = os.getenv("SEED", None)
 
-agent = Agent(name=NAME, port=PORT, seed=SEED, endpoint=ENDPOINT, mailbox=MAILBOX)
+agent = Agent(
+    name=NAME,
+    port=PORT,
+    seed=SEED,
+    endpoint=ENDPOINT,
+    mailbox=MAILBOX,
+    store_message_history=True,
+)
 
 
-class Message(Model):
-    text: str
+class Request(Model):
+    query: str
+
+
+class Response(Model):
+    status: str
+    message: str
 
 
 @agent.on_event("startup")
@@ -31,9 +43,11 @@ async def introduce_receiver(ctx: Context):
     ctx.logger.info(f"Balance of addr: {balances}")
 
 
-@agent.on_message(model=Message)
-async def receive_sender_message(ctx: Context, sender: str, msg: Message):
-    ctx.logger.info(f"Received message from {sender}: {msg.text}")
+@agent.on_rest_post("/chat", Request, Response)
+async def handle_post(ctx: Context, req: Request) -> Response:
+    ctx.logger.info(f"Query: {req.query}")
+    ctx.logger.info(f"{ctx.session_history()} histories")
+    return Response(status="success", message="Received POST request")
 
 
 if __name__ == "__main__":

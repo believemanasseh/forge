@@ -87,3 +87,4 @@ htmlcov/
 .DS_Store
 
 private_keys.json
+*_data.json
