@@ -1,27 +1,66 @@
 import { useState, useRef, useEffect } from "react";
 import send from "./assets/send.png";
 import type { MenuProps } from "antd";
-import { SettingOutlined, SunOutlined, DownOutlined } from "@ant-design/icons";
+import {
+  SettingOutlined,
+  SunOutlined,
+  DownOutlined,
+  QuestionOutlined,
+  RobotOutlined,
+} from "@ant-design/icons";
 import { Dropdown, Button, message, Space } from "antd";
 import { Squeeze as Hamburger } from "hamburger-react";
+import useSWRMutation from "swr/mutation";
+import { APIResponse, Message } from "./types";
 
-interface Messages {
-  id: number;
-  sender: string;
-  text: string;
-}
+const chatWithAgent = async (
+  url: string,
+  {
+    arg,
+  }: {
+    arg: {
+      query: string;
+      getter: Message[];
+      setter: (arg: Message[]) => void;
+    };
+  }
+) => {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query: arg.query }),
+  });
+  const jsonResponse = (await response.json()) as APIResponse;
+  const aiMessage: Message = {
+    id: Date.now(),
+    sender: "ai",
+    text: jsonResponse.message,
+  };
+  arg.setter([...arg.getter, aiMessage]);
+};
 
 const ChatInterface = () => {
-  const [messages, setMessages] = useState<Messages[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isOpen, setOpen] = useState(false);
   const [isMobile, setMobile] = useState(false);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const { trigger, isMutating } = useSWRMutation(
+    "http://localhost:8000/chat",
+    chatWithAgent,
+    {
+      onError: ({ err }) => {
+        message.error(`An error occurred: ${err}`);
+      },
+    }
+  );
 
   const handleSendMessage = () => {
     if (input.trim()) {
-      const newMessage = {
+      const newMessage: Message = {
         id: Date.now(),
         sender: "user",
         text: input,
@@ -37,7 +76,7 @@ const ChatInterface = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      handleSendMessage();
+      void handleSendMessage();
     }
   };
 
@@ -57,6 +96,11 @@ const ChatInterface = () => {
       key: "2",
       icon: <SettingOutlined />,
     },
+    {
+      label: "Help",
+      key: "3",
+      icon: <QuestionOutlined />,
+    },
   ];
 
   const menuProps = {
@@ -66,7 +110,17 @@ const ChatInterface = () => {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const triggerChat = async () => {
+      await trigger({
+        query: input,
+        getter: messages,
+        setter: setMessages,
+      });
+    };
+    if (messages.length && messages[messages.length - 1].sender === "user") {
+      void triggerChat();
+    }
+  }, [messages, input, trigger]);
 
   // Manage textarea height
   useEffect(() => {
@@ -90,7 +144,7 @@ const ChatInterface = () => {
   }, []);
 
   return (
-    <div className="md:grid md:grid-cols-[20%_1fr] h-screen w-screen overflow-x-hidden">
+    <div className="md:grid md:grid-cols-[20%_1fr] h-screen w-screen m-auto overflow-y-auto overflow-x-hidden">
       {isMobile ? (
         <div className="m-1">
           <div className={`${isOpen && "absolute top-1 left-1 z-11"}`}>
@@ -129,19 +183,45 @@ const ChatInterface = () => {
           </Dropdown>
         </div>
       )}
-      <div className="flex flex-col items-center">
-        <div className="overflow-y-auto overflow-x-hidden">
-          {messages.map((message) => (
-            <div key={message.id} className={`message ${message.sender}`}>
-              {message.text}
-            </div>
-          ))}
-          <div ref={chatEndRef} />
+      <div className="flex flex-col items-center m-auto justify-center max-h-[100%] max-w-[100%]">
+        <div className="h-[calc(100vh-100px)] overflow-y-auto overflow-x-hidden">
+          <div className="xs:max-w-[90%] xl:max-w-[49%] m-auto">
+            {messages.map((message) => {
+              if (message.sender === "ai") {
+                return (
+                  <div
+                    key={message.id}
+                    className="bg-[whitesmoke] w-[100%] rounded-2xl mt-5 p-3 flex flex-row gap-5 items-start"
+                  >
+                    <RobotOutlined
+                      className={`${isMutating ? "animate-spin" : ""} mt-1.5`}
+                    />
+                    <p className="break-normal">{message.text}</p>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  key={message.id}
+                  className="bg-[whitesmoke] flex flex-row rounded-2xl w-[100%] mt-5 p-3 "
+                >
+                  <p className="m-auto break-normal">{message.text}</p>
+                </div>
+              );
+            })}
+            <div ref={chatEndRef} />
+          </div>
         </div>
-        <div className="bg-[whitesmoke] p-5 rounded-lg xs:w-[80%] sm:w-[80%] md:w-[60%] lg:w-[50%] xl:w-[40%] m-auto mb-5 fixed bottom-4">
+        <div
+          className={`transition-all duration-300 ease-in-out m-auto fixed xs:w-[90%] md:w-[60%] lg:w-[50%] xl:w-[40%] ${
+            messages.length === 0
+              ? "top-[50%] translate-y-[-50%]"
+              : "xs:bottom-1 xl:bottom-5"
+          } bg-[white] shadow-lg p-5 rounded-2xl`}
+        >
           <textarea
             ref={textareaRef}
-            className="min-h-[50px] max-h-[500px] bg-white m-auto w-[100%] overflow-x-hidden overflow-y-auto border-none outline-none resize-none p-3 rounded-lg"
+            className="bg-white m-auto w-[100%] overflow-x-hidden overflow-y-auto border-none outline-none resize-none p-3 rounded-lg"
             cols={100}
             placeholder="Type your message..."
             value={input}
@@ -153,7 +233,9 @@ const ChatInterface = () => {
               className="cursor-pointer w-[40px] h-auto"
               src={send}
               alt="send message"
-              onClick={handleSendMessage}
+              onClick={() => {
+                void handleSendMessage();
+              }}
             />
           </div>
         </div>
