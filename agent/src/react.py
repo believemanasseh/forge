@@ -102,7 +102,7 @@ def parse_llm_response(response: str) -> dict[str, Any]:
 async def begin_react_loop(
     ctx: Context, user_input: str, max_steps: int = 3
 ) -> dict[str, Any]:
-    """Execute the ReAct loop to process user input and perform actions.
+    """Execute the reason-action (ReAct) loop to process user input and perform actions.
 
     Args:
         ctx (Context): The agent context object
