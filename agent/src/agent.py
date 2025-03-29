@@ -2,7 +2,6 @@ from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from uagents import Agent, Context
 
 from src.config import get_config
-from src.llm import call_llm
 from src.react import begin_react_loop
 from src.schemas import Request, Response
 
@@ -52,11 +51,10 @@ async def handle_post(ctx: Context, req: Request) -> Response:
         Response: Contains status, LLM response message, and REACT loop result
     """
     ctx.logger.info(f"Query: {req.query}")
-    res = call_llm(req.query)
     ctx.logger.info(f"{ctx.session_history()} histories")
-    result = await begin_react_loop(ctx, req.query)
+    data = await begin_react_loop(ctx, req.query)
     return Response(
-        status="success", message=res["choices"][0]["message"]["content"], data=result
+        status="success", message="Project scaffolded successfully", data=data
     )
 
 
