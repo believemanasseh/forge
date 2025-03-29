@@ -105,7 +105,7 @@ async def begin_react_loop(
     """Execute the ReAct loop to process user input and perform actions.
 
     Args:
-        ctx (Context): The context object for logging and handling operations
+        ctx (Context): The agent context object
         user_input (str): The user's input text to process
         max_steps (int, optional): Maximum number of iterations. Defaults to 3.
 
@@ -124,7 +124,7 @@ async def begin_react_loop(
     )
 
     while step < max_steps:
-        response = call_llm(
+        response = await call_llm(
             PROMPT.format(actions=action_descriptions, input=user_input)
         )
 
