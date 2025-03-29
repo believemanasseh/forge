@@ -6,9 +6,6 @@ class Request(Model):
 
 
 class Response(Model):
-    id: str
-    object: str
-    created: int
-    model: str
-    choices: list
-    usage: dict
+    status: str
+    message: str
+    data: dict = None

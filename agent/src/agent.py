@@ -36,12 +36,8 @@ async def handle_post(ctx: Context, req: Request) -> Response:
     res = call_llm(req.query)
     ctx.logger.info(f"{ctx.session_history()} histories")
     return Response(
-        id=res["id"],
-        object=res["object"],
-        created=res["created"],
-        model=res["model"],
-        choices=res["choices"],
-        usage=res["usage"],
+        status="success",
+        message=res["choices"][0]["message"]["content"],
     )
 
 
