@@ -64,7 +64,7 @@ Response: Django and Flask are both Python web frameworks but have different phi
 Current conversation:
 User: {input}
 
-Remember to respond with Thought/Action/Action Args."""
+Remember to respond with Thought/Action/Action Args or Thought/Response."""
 
 
 def parse_llm_response(response: str) -> dict[str, Any]:
