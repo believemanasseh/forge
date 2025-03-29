@@ -11,10 +11,11 @@ def scaffold_django(
     project_name: str = "myproject",
 ) -> str | None:
     """
-    Creates a Django project scaffold and returns the path to the zipped project.
+    Scaffolds a Django project and returns the path to the zipped project.
 
     Args:
-        project_name: Name of the Django project
+        ctx (Context): The agent context object
+        project_name (str, optional): Name of the Django project. Defaults to "myproject"
 
     Returns:
         str | None: Path to the zipped project if successful, None otherwise
@@ -25,25 +26,25 @@ def scaffold_django(
 
         # Create virtual environment
         venv_path = os.path.join(temp_dir, "venv")
-        subprocess.run(["python3", "-m", "venv", venv_path], check=True)
+        subprocess.run(f"python3 -m venv {venv_path}", shell=True, check=True)
 
         # Get path to pip and python in virtual environment
         pip_path = os.path.join(venv_path, "bin", "pip")
         python_path = os.path.join(venv_path, "bin", "python")
 
         # Install Django
-        subprocess.run([pip_path, "install", "django"], check=True)
+        subprocess.run(f"{pip_path} install django", shell=True, check=True)
 
         # Create Django project
         os.chdir(temp_dir)
         subprocess.run(
-            [python_path, "-m", "django", "startproject", project_name], check=True
+            f"{python_path} -m django-admin startproject {project_name}",
+            shell=True,
+            check=True,
         )
 
         # Create requirements.txt
-        subprocess.run(
-            [pip_path, "freeze", ">", "requirements.txt"], shell=True, check=True
-        )
+        subprocess.run(f"{pip_path} freeze > requirements.txt", shell=True, check=True)
 
         # Create zip file
         zip_path = os.path.join(temp_dir, f"{project_name}.zip")

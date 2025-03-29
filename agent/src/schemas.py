@@ -1,3 +1,5 @@
+from typing import Any
+
 from uagents import Model
 
 
@@ -8,4 +10,4 @@ class Request(Model):
 class Response(Model):
     status: str
     message: str
-    data: dict = None
+    data: dict[str, Any] = None
