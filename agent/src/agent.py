@@ -22,7 +22,7 @@ agent = Agent(
 @agent.on_event("startup")
 async def handle_startup(ctx: Context) -> None:
     """
-    Startup event handler that initializes the agent and checks wallet balance.
+    Startup event handler that initialises the agent
 
     Args:
         ctx (Context): The agent context object
@@ -42,7 +42,7 @@ async def handle_startup(ctx: Context) -> None:
 @agent.on_rest_post("/chat", Request, Response)
 async def handle_post(ctx: Context, req: Request) -> Response:
     """
-    Handle POST requests to the /chat endpoint.
+    Handles POST requests to the /chat endpoint.
 
     Args:
         ctx (Context): The agent context object
