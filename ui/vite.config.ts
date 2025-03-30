@@ -9,6 +9,6 @@ export default defineConfig({
     include: ["swr"],
   },
   server: {
-    allowedHosts: ["localhost", "ebbc-160-152-124-55.ngrok-free.app"],
+    allowedHosts: ["localhost", "ab4e-160-152-124-55.ngrok-free.app"],
   },
 });

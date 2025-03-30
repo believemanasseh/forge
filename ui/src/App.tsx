@@ -117,7 +117,11 @@ const ChatInterface = () => {
         setter: setMessages,
       });
     };
-    if (messages.length && messages[messages.length - 1].sender === "user") {
+    if (
+      messages.length &&
+      messages[messages.length - 1].sender === "user" &&
+      input
+    ) {
       void triggerChat();
     }
   }, [messages, input, trigger]);
@@ -183,60 +187,68 @@ const ChatInterface = () => {
           </Dropdown>
         </div>
       )}
-      <div className="flex flex-col items-center m-auto justify-center max-h-[100%] max-w-[100%]">
-        <div className="h-[calc(100vh-100px)] overflow-y-auto overflow-x-hidden">
-          <div className="xs:max-w-[90%] xl:max-w-[49%] m-auto">
-            {messages.map((message) => {
-              if (message.sender === "ai") {
+      <div className="max-w-[100%] xs:overflow-y-auto xs:overflow-x-hidden">
+        <div className="flex flex-col m-auto max-h-[100%] w-[50%]">
+          <div className="xs:h-[calc(100vh-100px)] m-auto xs:max-w-[90%] bg-[black] md:max-w-[60%] lg:min-w-[100%] lg:max-w-[100%] rounded-2xl p-5">
+            <div className="w-[100%] bg-[blue] m-auto">
+              {messages.map((message) => {
+                if (message.sender === "ai") {
+                  return (
+                    <div
+                      className="bg-[whitesmoke] rounded-2xl mt-5 p-3 flex flex-row gap-5 max-w-[100%] items-start"
+                      key={message.id}
+                    >
+                      <RobotOutlined
+                        className={`${
+                          isMutating ? "animate-spin" : ""
+                        } mt-1.5 flex-shrink-0`}
+                      />
+                      <p className="m-auto max-w-[100%] break-words">
+                        {message.text}
+                      </p>
+                    </div>
+                  );
+                }
                 return (
                   <div
+                    className="bg-[whitesmoke] rounded-2xl m-[10px_auto] max-w-fit p-3"
                     key={message.id}
-                    className="bg-[whitesmoke] w-[100%] rounded-2xl mt-5 p-3 flex flex-row gap-5 items-start"
                   >
-                    <RobotOutlined
-                      className={`${isMutating ? "animate-spin" : ""} mt-1.5`}
-                    />
-                    <p className="break-normal">{message.text}</p>
+                    <p className="m-auto max-w-[100%] break-words">
+                      {message.text}
+                    </p>
                   </div>
                 );
-              }
-              return (
-                <div
-                  key={message.id}
-                  className="bg-[whitesmoke] flex flex-row rounded-2xl w-[100%] mt-5 p-3 "
-                >
-                  <p className="m-auto break-normal">{message.text}</p>
-                </div>
-              );
-            })}
-            <div ref={chatEndRef} />
+              })}
+              <div ref={chatEndRef} />
+            </div>
           </div>
-        </div>
-        <div
-          className={`transition-all duration-300 ease-in-out m-auto fixed xs:w-[90%] md:w-[60%] lg:w-[50%] xl:w-[40%] ${
-            messages.length === 0
-              ? "top-[50%] translate-y-[-50%]"
-              : "xs:bottom-1 xl:bottom-5"
-          } bg-[white] shadow-lg p-5 rounded-2xl`}
-        >
-          <textarea
-            ref={textareaRef}
-            className="bg-white m-auto w-[100%] overflow-x-hidden overflow-y-auto border-none outline-none resize-none p-3 rounded-lg"
-            cols={100}
-            placeholder="Type your message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <div className="flex mx-auto justify-end">
-            <img
-              className="cursor-pointer w-[40px] h-auto"
-              src={send}
-              alt="send message"
-              onClick={() => {
-                void handleSendMessage();
-              }}
+          <div
+            className={`transition-all duration-300 ease-in-out m-auto fixed xs:w-[90%] md:w-[60%] lg:w-[50%] xl:w-[40%] ${
+              messages.length === 0
+                ? "top-[50%] translate-y-[-50%]"
+                : "xs:bottom-1 xl:bottom-5"
+            } bg-[white] shadow-lg p-5 rounded-2xl`}
+          >
+            <textarea
+              ref={textareaRef}
+              className="bg-white m-auto w-[100%] overflow-x-hidden overflow-y-auto border-none outline-none resize-none p-3 rounded-lg"
+              cols={100}
+              placeholder="Type your message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
             />
+            <div className="flex mx-auto justify-end">
+              <img
+                className="cursor-pointer w-[40px] h-auto"
+                src={send}
+                alt="send message"
+                onClick={() => {
+                  void handleSendMessage();
+                }}
+              />
+            </div>
           </div>
         </div>
       </div>
