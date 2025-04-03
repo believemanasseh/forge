@@ -2,7 +2,6 @@ from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from uagents import Agent, Context
 
 from src.config import get_config
-from src.react import begin_react_loop
 from src.schemas import Request, Response
 
 config = get_config()
@@ -50,6 +49,8 @@ async def handle_post(ctx: Context, req: Request) -> Response:
     Returns:
         Response: Contains status, LLM response message, and REACT loop result
     """
+    from src.react import begin_react_loop
+
     ctx.logger.info(f"Query: {req.query}")
     ctx.logger.info(f"{ctx.session_history()} histories")
     data = await begin_react_loop(ctx, req.query)
