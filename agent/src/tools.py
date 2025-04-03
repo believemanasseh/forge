@@ -34,14 +34,29 @@ def scaffold_django(
 
         # Install Django
         subprocess.run(f"{pip_path} install django", shell=True, check=True)
+        ctx.logger.info("Django installed successfully.")
+
+        project_path = os.path.join(temp_dir, project_name)
+        if os.path.exists(project_path):
+            ctx.logger.error(
+                f"Project '{project_name}' already exists at {project_path}"
+            )
+            return None
 
         # Create Django project
-        os.chdir(temp_dir)
-        subprocess.run(
-            f"{python_path} -m django-admin startproject {project_name}",
-            shell=True,
-            check=True,
-        )
+        try:
+            os.chdir(temp_dir)
+            subprocess.run(
+                f"{python_path} -m django startproject {project_name}",
+                shell=True,
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            if "already exists" in e.stderr:
+                ctx.logger.error(f"Project '{project_name}' already exists")
+            else:
+                ctx.logger.error(f"Failed to create project: {e.stderr}")
+            return None
 
         # Create requirements.txt
         subprocess.run(f"{pip_path} freeze > requirements.txt", shell=True, check=True)

@@ -47,7 +47,7 @@ async def handle_post(ctx: Context, req: Request) -> Response:
         req (Request): The incoming request containing the query
 
     Returns:
-        Response: Contains status, LLM response message, and REACT loop result
+        Response: Contains status, response message, and ReAct loop result
     """
     from src.react import begin_react_loop
 

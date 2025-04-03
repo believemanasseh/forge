@@ -87,9 +87,11 @@ def parse_llm_response(response: str) -> dict[str, Any]:
             result["action"] = line[7:].strip()
         elif line.startswith("Action Args:"):
             try:
-                result["action_args"] = json.loads(line[11:].strip())
+                result["action_args"] = json.loads(line[13:].strip())
+                result["project_name"] = result["action_args"].get("project_name")
             except json.JSONDecodeError:
                 result["action_args"] = {}
+                result["project_name"] = "myproject"
         elif line.startswith("Response:"):
             result["response"] = line[9:].strip()
 
@@ -121,10 +123,12 @@ async def begin_react_loop(
     )
 
     while step < max_steps:
+        ctx.logger.info("Querying LLM")
         response = await call_llm(
             PROMPT.format(actions=action_descriptions, input=user_input)
         )
 
+        ctx.logger.info("Parsing LLM response")
         decision = parse_llm_response(response["choices"][0]["message"]["content"])
 
         ctx.logger.info(f"Thought: {decision.get('thought')}")
@@ -134,7 +138,9 @@ async def begin_react_loop(
         if action_name and action_name in ACTIONS:
             action = ACTIONS[action_name]
             try:
-                result = action.function(ctx=ctx, **decision.get("action_args", {}))
+                result = action.function(
+                    ctx=ctx, project_name=decision.get("project_name")
+                )
                 if result:
                     break
             except Exception as e:
@@ -145,6 +151,7 @@ async def begin_react_loop(
     return {
         "thought": decision.get("thought"),
         "action": action_name,
+        "action_args": decision.get("action_args"),
         "result": result,
         "response": decision.get("response"),
     }
