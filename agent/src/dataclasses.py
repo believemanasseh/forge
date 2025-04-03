@@ -7,4 +7,3 @@ class Action:
     name: str
     description: str
     function: Callable
-    args: list[str]
