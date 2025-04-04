@@ -18,7 +18,7 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 ## 🚀 Features
 
 - 🤖 Natural language project creation
-- 🎯 Supports multiple frameworks:
+- 🎯 Supports multiple projects:
   - Django
   - React
   - Svelte
