@@ -21,7 +21,7 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 
 ## Development Setup
 
-### uAgents
+### Agent
 
 Install dependencies
 
