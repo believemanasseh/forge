@@ -5,6 +5,8 @@ import tempfile
 
 from uagents import Context
 
+from src.utils import create_zip_file, move_zip_file
+
 
 def scaffold_django(
     ctx: Context,
@@ -60,18 +62,13 @@ def scaffold_django(
 
         # Create requirements.txt
         subprocess.run(f"{pip_path} freeze > requirements.txt", shell=True, check=True)
+        ctx.logger.info("requirements.txt created successfully.")
 
         # Create zip file
-        zip_path = os.path.join(temp_dir, f"{project_name}.zip")
-        shutil.make_archive(
-            os.path.join(temp_dir, project_name), "zip", temp_dir, project_name
-        )
-
-        # Move zip file to /tmp directory
-        if not os.path.exists("/tmp"):
-            os.makedirs("/tmp")
-        final_zip_path = os.path.join("/tmp", f"{project_name}.zip")
-        shutil.move(zip_path, final_zip_path)
+        zip_path = create_zip_file(temp_dir, project_name)
+        directory = "/tmp"
+        final_zip_path = move_zip_file(zip_path, directory, project_name)
+        ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         return final_zip_path
 
