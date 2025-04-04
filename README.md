@@ -13,7 +13,13 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 - 🤖 Natural language project creation
 - 🎯 Supports multiple frameworks:
   - Django
-  - React (Vite/CRA)
+  - React
+  - Svelte
+  - Preact
+  - Vanilla JS/TS
+  - Lit
+  - Solid
+  - Qwik
   - Vue.js
 - ⚙️ Smart configuration handling
 - 📦 Automated dependency management
