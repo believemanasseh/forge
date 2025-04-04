@@ -1,12 +1,12 @@
 # uAgents Hack
 
-![Forge Logo](assets/forge.png)
-
 A lightweight, autonomous agent built using uAgents to facilitate intelligent project scaffolding/initialisation and automation.
 
 [![Built with uAgents](https://img.shields.io/badge/Built%20with-uAgents-blue)](https://github.com/fetch-ai/uAgents)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-18.x-blue)](https://reactjs.org/)
+
+![Forge Logo](assets/forge.png)
 
 ## 🚀 Features
 
