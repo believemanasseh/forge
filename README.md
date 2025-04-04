@@ -6,7 +6,7 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-18.x-blue)](https://reactjs.org/)
 
-![Forge Logo](assets/forge.png)
+![Forge Logo](assets/forge.jpg)
 
 ## 🚀 Features
 
