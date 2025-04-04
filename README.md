@@ -10,18 +10,6 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 
 ## 🚀 Features
 
-```mermaid
-graph TD
-    A[User Request] --> B[Forge Agent]
-    B --> C{Project Type}
-    C -->|Django| D[Django Project]
-    C -->|React| E[React Project]
-    C -->|Vue| F[Vue Project]
-    D --> G[Zip File]
-    E --> G
-    F --> G
-```
-
 - 🤖 Natural language project creation
 - 🎯 Supports multiple frameworks:
   - Django
