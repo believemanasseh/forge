@@ -1,4 +1,4 @@
-# uAgents Hack
+# Forge
 
 A lightweight, autonomous agent built using uAgents to facilitate intelligent project scaffolding/initialisation and automation.
 
