@@ -5,6 +5,7 @@ import tempfile
 
 from uagents import Context
 
+from src.dataclasses import ViteConfig
 from src.utils import create_zip_file, move_zip_file
 
 
@@ -12,8 +13,7 @@ def scaffold_django(
     ctx: Context,
     project_name: str = "myproject",
 ) -> str | None:
-    """
-    Scaffolds a Django project and returns the path to the zipped project.
+    """Scaffolds a Django project and returns the path to the zipped project.
 
     Args:
         ctx (Context): The agent context object
@@ -84,11 +84,47 @@ def scaffold_django(
             shutil.rmtree(temp_dir)
 
 
-def scaffold_react():
-    # TODO: Implement React scaffolding
-    pass
+def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
+    """Scaffolds a project using Vite and returns the path to the zipped project.
+    Supports various templates/frameworks including React, Vue, Svelte, Preact, Solid, Svelte, Qwik, Lit and Vanilla JavaScript/TypeScript.
 
+    Args:
+        ctx (Context): The agent context object
+        config (ViteConfig): Configuration object containing project settings
+                            including template choice and package manager
 
-def scaffold_vue():
-    # TODO: Implement Vue scaffolding
-    pass
+    Returns:
+        str | None: Path to the zipped project if successful, None otherwise
+    """
+    try:
+        # Create a temporary directory
+        temp_dir = tempfile.mkdtemp()
+
+        # Create app using Vite
+        em_dashes = "--" if config.package_manager == "npm" else ""
+        subprocess.run(
+            f"{config.package_manager} create vite@latest {config.project_name} {em_dashes} --template {config.template}",
+            shell=True,
+            check=True,
+            cwd=temp_dir,
+        )
+        ctx.logger.info("Vite project created successfully.")
+
+        # Create zip file
+        zip_path = create_zip_file(temp_dir, config.project_name)
+        directory = "/tmp"
+        final_zip_path = move_zip_file(zip_path, directory, config.project_name)
+        ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
+
+        return final_zip_path
+
+    except subprocess.CalledProcessError as e:
+        ctx.logger.error(f"Command failed: {str(e)}")
+        return None
+    except Exception as e:
+        ctx.logger.error(f"Error creating Vite project: {str(e)}")
+        return None
+    finally:
+        # Clean up temporary directory
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)

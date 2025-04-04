@@ -10,8 +10,7 @@ class Action:
 
 
 @dataclass
-class ReactConfig:
-    project_name: str = "myproject"
+class ViteConfig:
     template: Literal[
         "vanilla",
         "vanilla-ts",
@@ -32,6 +31,5 @@ class ReactConfig:
         "qwik",
         "qwik-ts",
     ]
-    package_manager: Literal["npm", "yarn", "pnpm"]
-    framework: Literal["vite", "cra"]
-    styling: Literal["css", "scss", "tailwind"]
+    project_name: str = "myproject"
+    package_manager: Literal["npx", "npm", "yarn", "pnpm"] = "npm"

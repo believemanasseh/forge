@@ -2,9 +2,9 @@ import json
 from typing import Any
 
 from src.agent import Context
-from src.dataclasses import Action
+from src.dataclasses import Action, ViteConfig
 from src.llm import call_llm
-from src.tools import scaffold_django, scaffold_react, scaffold_vue
+from src.tools import scaffold_django, scaffold_vite
 
 ACTIONS = {
     "scaffold_django": Action(
@@ -12,15 +12,10 @@ ACTIONS = {
         description="Create a new Django project scaffold",
         function=scaffold_django,
     ),
-    "scaffold_react": Action(
-        name="scaffold_react",
-        description="Create a new React project scaffold",
-        function=scaffold_react,
-    ),
-    "scaffold_vue": Action(
-        name="scaffold_vue",
-        description="Create a new Vue.js project scaffold",
-        function=scaffold_vue,
+    "scaffold_vite": Action(
+        name="scaffold_vite",
+        description="Create a new React, Vue, Svelte, Preact, Solid, Svelte, Qwik, Lit and Vanilla JavaScript/TypeScript scaffold",
+        function=scaffold_vite,
     ),
 }
 
@@ -28,6 +23,17 @@ PROMPT = """You are a project scaffolding assistant. Given the user's request, t
 
 Available actions:
 {actions}
+
+Configuration Options:
+1. Frontend Templates:
+   - React: ["react", "react-ts", "react-swc", "react-swc-ts"]
+   - Vue: ["vue", "vue-ts"]
+   - Others: ["svelte", "svelte-ts", "preact", "preact-ts", "lit", "lit-ts", "solid", "solid-ts", "qwik", "qwik-ts"]
+   - Basic: ["vanilla", "vanilla-ts"]
+
+2. Package Managers: ["npx", "npm", "yarn", "pnpm"]
+
+When scaffolding a frontend project, you must include both template and package manager in your response.
 
 If the user's request requires project scaffolding, use one of the actions above.
 If the user is asking a question or needs information, respond conversationally without using actions.
@@ -37,7 +43,7 @@ Think through this step-by-step:
 2) Does this require project scaffolding or just information?
 3) Choose appropriate response format
 
-Respond in ONE of these two formats:
+Respond in ONE of these formats:
 
 For project scaffolding:
 Thought: [your reasoning]
@@ -54,6 +60,17 @@ Thought: User wants a Django project scaffold with name 'myblog'
 Action: scaffold_django
 Action Args: {{"project_name": "myblog"}}
 
+User: "Set up a Vue project using pnpm"
+Thought: User wants a Vue.js project using pnpm package manager
+Action: scaffold_vite
+Action Args: {{"project_name": "my-vue-app", "template": "vue", "package_manager": "pnpm"}}
+
+User: "Create a Svelte TypeScript project with Yarn"
+Thought: User wants a Svelte project with TypeScript and Yarn
+Action: scaffold_vite
+Action Args: {{"project_name": "my-svelte-app", "template": "svelte-ts", "package_manager": "yarn"}}
+
+
 User: "What's the difference between Django and Flask?"
 Thought: User is asking for information about web frameworks
 Response: Django and Flask are both Python web frameworks but have different philosophies. Django is a full-featured framework that provides many built-in features like admin interface, ORM, and authentication. Flask is a lightweight framework that gives you more flexibility in choosing your tools and architecture...
@@ -61,7 +78,11 @@ Response: Django and Flask are both Python web frameworks but have different phi
 Current conversation:
 User: {input}
 
-Remember to respond with Thought/Action/Action Args or Thought/Response."""
+Remember to:
+1. Respond with Thought/Action/Action Args or Thought/Response.
+2. For frontend projects, infer template type from user request (default to Vanilla JavaScript if not specified)
+3. For frontend projects, use specified package manager or default to npm
+"""
 
 
 def parse_llm_response(response: str) -> dict[str, Any]:
@@ -89,9 +110,13 @@ def parse_llm_response(response: str) -> dict[str, Any]:
             try:
                 result["action_args"] = json.loads(line[13:].strip())
                 result["project_name"] = result["action_args"].get("project_name")
+                result["template"] = result["action_args"].get("template")
+                result["package_manager"] = result["action_args"].get("package_manager")
             except json.JSONDecodeError:
                 result["action_args"] = {}
                 result["project_name"] = "myproject"
+                result["template"] = "vanilla"
+                result["package_manager"] = "npm"
         elif line.startswith("Response:"):
             result["response"] = line[9:].strip()
 
@@ -138,9 +163,18 @@ async def begin_react_loop(
         if action_name and action_name in ACTIONS:
             action = ACTIONS[action_name]
             try:
-                result = action.function(
-                    ctx=ctx, project_name=decision.get("project_name")
-                )
+                if action_name == "scaffold_django":
+                    result = action.function(
+                        ctx=ctx, project_name=decision.get("project_name")
+                    )
+                elif action_name == "scaffold_vite":
+                    config = ViteConfig(
+                        template=decision.get("template"),
+                        project_name=decision.get("project_name"),
+                        package_manager=decision.get("package_manager"),
+                    )
+                    result = action.function(ctx=ctx, config=config)
+
                 if result:
                     break
             except Exception as e:
