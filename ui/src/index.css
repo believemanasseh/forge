@@ -4,7 +4,7 @@
   --breakpoint-xs: 0rem;
 }
 
-:root {
+/* :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -17,14 +17,30 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+} */
+
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: whitesmoke;
+  --text-primary: #000000;
+  --text-secondary: #4b5563;
+  --border-color: #cccccc;
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --text-primary: #ffffff;
+  --text-secondary: #a0aec0;
+  --border-color: #404040;
 }
 
 body {
   margin: 0;
   box-sizing: border-box;
   padding: 0;
-  background-color: white;
-  color: black;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   scrollbar-gutter: stable;
 }
 
