@@ -70,9 +70,10 @@ const ChatInterface = () => {
     url: "",
   });
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  console.log(import.meta.env.VITE_API_URL, "g");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const { trigger, isMutating } = useSWRMutation(
-    "http://localhost:8000/chat",
+    `${import.meta.env.VITE_API_URL}/chat`,
     chatWithAgent,
     {
       onError: ({ err }) => {
