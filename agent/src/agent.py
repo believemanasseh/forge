@@ -51,12 +51,18 @@ async def handle_post(ctx: Context, req: Request) -> Response:
     """
     from src.react import begin_react_loop
 
-    ctx.logger.info(f"Query: {req.query}")
+    if not req.query:
+        return Response(status="error", message="Query is empty")
+
     ctx.logger.info(f"{ctx.session_history()} histories")
     data = await begin_react_loop(ctx, req.query)
-    return Response(
-        status="success", message="Project scaffolded successfully", data=data
-    )
+
+    if data["action"]:
+        return Response(
+            status="success", message="Project scaffolded successfully", data=data
+        )
+
+    return Response(status="success", message=data["response"])
 
 
 if __name__ == "__main__":

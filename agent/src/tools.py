@@ -6,7 +6,7 @@ import tempfile
 from uagents import Context
 
 from src.dataclasses import ViteConfig
-from src.utils import create_zip_file, move_zip_file
+from src.utils import create_zip_file, move_zip_file, upload_to_s3
 
 
 def scaffold_django(
@@ -70,8 +70,13 @@ def scaffold_django(
         final_zip_path = move_zip_file(zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
-        return final_zip_path
+        s3_url = upload_to_s3(
+            ctx, final_zip_path, "forge-projects", f"projects/{project_name}.zip"
+        )
+        if not s3_url:
+            return None
 
+        ctx.logger.info(f"Project uploaded successfully: {s3_url}")
     except subprocess.CalledProcessError as e:
         ctx.logger.error(f"Command failed: {str(e)}")
         return None
@@ -82,6 +87,8 @@ def scaffold_django(
         # Clean up temporary directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+
+    return s3_url
 
 
 def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
@@ -116,8 +123,13 @@ def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
         final_zip_path = move_zip_file(zip_path, directory, config.project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
-        return final_zip_path
+        s3_url = upload_to_s3(
+            ctx, final_zip_path, "forge-projects", f"projects/{config.project_name}.zip"
+        )
+        if not s3_url:
+            return None
 
+        ctx.logger.info(f"Project uploaded successfully: {s3_url}")
     except subprocess.CalledProcessError as e:
         ctx.logger.error(f"Command failed: {str(e)}")
         return None
@@ -128,3 +140,5 @@ def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
         # Clean up temporary directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+
+    return s3_url
