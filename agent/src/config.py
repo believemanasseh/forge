@@ -4,10 +4,10 @@ from typing import Optional
 from pydantic_settings import BaseSettings
 
 
-class Config(BaseSettings):
-    NAME: str = "doki"
-    PORT: str = "8000"
-    ENDPOINT: str = "http://localhost:8000/submit"
+class Configuration(BaseSettings):
+    NAME: str = "Doki"
+    PORT: str = "5000"
+    ENDPOINT: str = "https://forge-api.daimones.xyz/submit"
     MAILBOX: bool = False
     SEED: Optional[str] = None
     LLM_API_KEY: Optional[str] = None
@@ -20,5 +20,5 @@ class Config(BaseSettings):
 
 
 @lru_cache
-def get_config() -> Config:
-    return Config()
+def get_config() -> Configuration:
+    return Configuration()
