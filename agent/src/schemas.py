@@ -1,18 +1,20 @@
+from typing import Optional
+
 from uagents import Model
 
 
 class ActionArgs(Model):
     project_name: str
-    template: str
-    package_manager: str
+    template: Optional[str] = None
+    package_manager: Optional[str] = None
 
 
 class Data(Model):
     thought: str
-    action: str
-    action_args: ActionArgs
-    result: str
-    response: str
+    action: Optional[str] = None
+    action_args: Optional[ActionArgs] = None
+    result: Optional[str] = None
+    response: Optional[str] = None
 
 
 class Request(Model):
@@ -22,4 +24,4 @@ class Request(Model):
 class Response(Model):
     status: str
     message: str
-    data: Data = None
+    data: Optional[Data] = None
