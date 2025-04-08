@@ -167,7 +167,7 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
 
         # Create project using Composer
         subprocess.run(
-            f"composer create-project --prefer-dist laravel/laravel {project_name}",
+            f"/usr/local/bin/composer create-project --prefer-dist laravel/laravel {project_name}",
             shell=True,
             check=True,
             cwd=temp_dir,
