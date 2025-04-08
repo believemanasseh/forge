@@ -28,18 +28,14 @@ def scaffold_django(
 
         # Create virtual environment
         venv_path = os.path.join(temp_dir, "venv")
-        subprocess.run(
-            f"python3 -m venv {venv_path}", shell=True, check=True, cwd=temp_dir
-        )
+        subprocess.run(f"python3 -m venv {venv_path}", shell=True, check=True)
 
         # Get path to pip and python in virtual environment
         pip_path = os.path.join(venv_path, "bin", "pip")
         python_path = os.path.join(venv_path, "bin", "python")
 
         # Install Django
-        subprocess.run(
-            f"{pip_path} install django", shell=True, check=True, cwd=temp_dir
-        )
+        subprocess.run(f"{pip_path} install django", shell=True, check=True)
         ctx.logger.info("Django installed successfully.")
 
         project_path = os.path.join(temp_dir, project_name)
@@ -51,12 +47,11 @@ def scaffold_django(
 
         # Create Django project
         try:
-            # os.chdir(temp_dir)
+            os.chdir(temp_dir)
             subprocess.run(
                 f"{python_path} -m django startproject {project_name}",
                 shell=True,
                 check=True,
-                cwd=temp_dir,
             )
         except subprocess.CalledProcessError as e:
             if "already exists" in e.stderr:
@@ -66,12 +61,7 @@ def scaffold_django(
             return None
 
         # Create requirements.txt
-        subprocess.run(
-            f"{pip_path} freeze > requirements.txt",
-            shell=True,
-            check=True,
-            cwd=temp_dir,
-        )
+        subprocess.run(f"{pip_path} freeze > requirements.txt", shell=True, check=True)
         ctx.logger.info("requirements.txt created successfully.")
 
         # Create zip file
