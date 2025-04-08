@@ -15,7 +15,7 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 [![Qwik](https://img.shields.io/badge/Qwik-blue?logo=qwik)](https://qwik.builder.io/)
 [![Vue.js](https://img.shields.io/badge/Vue.js-4FC08D?logo=vue.js&logoColor=white)](https://vuejs.org/)
 
-![Forge](assets/forge.jpg)
+![Forge](docs/assets/forge.jpg)
 
 ## 🚀 Features
 
@@ -100,7 +100,7 @@ npm run dev
 
 ## 🌐 Architecture
 
-![Sequence diagram](assets/sequence-diagram.jpg)
+![Sequence diagram](docs/assets/sequence-diagram.jpg)
 
 ## 📝 Example Usage
 
