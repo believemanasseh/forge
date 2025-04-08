@@ -3,6 +3,7 @@
 A lightweight, autonomous agent built using uAgents to facilitate intelligent project scaffolding/initialisation and automation.
 
 [![tag : innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)](https://innovationlab.fetch.ai/)
+![tag:domain/forge](https://img.shields.io/badge/domain-colorcode)
 [![Built with uAgents](https://img.shields.io/badge/Built%20with-uAgents-blue)](https://github.com/fetch-ai/uAgents)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-18.x-blue)](https://reactjs.org/)
@@ -32,6 +33,38 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 - ⚙️ Smart configuration handling
 - 📦 Automated dependency management
 - 🔄 Best practices templates
+
+## Data Models
+
+### Input Data Model
+
+```py
+class Request(Model):
+    query: str
+```
+
+### Output Data Model
+
+```py
+class ActionArgs(Model):
+    project_name: str
+    template: str
+    package_manager: str
+
+
+class Data(Model):
+    thought: str
+    action: str
+    action_args: ActionArgs
+    result: str
+    response: str
+
+
+class Response(Model):
+    status: str
+    message: str
+    data: Data = None
+```
 
 ## Development Setup
 
