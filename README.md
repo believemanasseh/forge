@@ -82,16 +82,10 @@ cd agent
 pipenv install
 ```
 
-Run Forge
+Run agent
 
 ```bash
 pipenv run python -m src.forge
-```
-
-Run Assistant
-
-```bash
-pipenv run python -m src.assistant
 ```
 
 ### UI

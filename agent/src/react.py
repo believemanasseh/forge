@@ -4,7 +4,7 @@ from typing import Any
 from src.dataclasses import Action, ViteConfig
 from src.forge import Context
 from src.llm import call_llm
-from src.tools import scaffold_django, scaffold_vite
+from src.tools import scaffold_django, scaffold_laravel, scaffold_rails, scaffold_vite
 
 ACTIONS = {
     "scaffold_django": Action(
@@ -16,6 +16,16 @@ ACTIONS = {
         name="scaffold_vite",
         description="Create a new React, Vue, Svelte, Preact, Solid, Svelte, Qwik, Lit and Vanilla JavaScript/TypeScript scaffold",
         function=scaffold_vite,
+    ),
+    "scaffold_laravel": Action(
+        name="scaffold_laravel",
+        description="Create a new Laravel project scaffold",
+        function=scaffold_laravel,
+    ),
+    "scaffold_rails": Action(
+        name="scaffold_rails",
+        description="Create a new Ruby on Rails project scaffold",
+        function=scaffold_rails,
     ),
 }
 
