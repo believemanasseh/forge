@@ -62,5 +62,10 @@ async def handle_post(ctx: Context, req: Request) -> Response:
     return Response(status="success", message=data["response"])
 
 
+@agent.on_message(Request)
+async def handle_request(ctx: Context, sender: str, msg: Request):
+    ctx.logger.info(f"Received response from {sender}: {msg.query}")
+
+
 if __name__ == "__main__":
     agent.run()
