@@ -173,17 +173,17 @@ async def begin_react_loop(
         if action_name and action_name in ACTIONS:
             action = ACTIONS[action_name]
             try:
-                if action_name == "scaffold_django":
-                    result = action.function(
-                        ctx=ctx, project_name=decision.get("project_name")
-                    )
-                elif action_name == "scaffold_vite":
+                if action_name == "scaffold_vite":
                     config = ViteConfig(
                         template=decision.get("template"),
                         project_name=decision.get("project_name"),
                         package_manager=decision.get("package_manager"),
                     )
                     result = action.function(ctx=ctx, config=config)
+                else:
+                    result = action.function(
+                        ctx=ctx, project_name=decision.get("project_name")
+                    )
 
                 if result:
                     break

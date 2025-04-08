@@ -26,6 +26,8 @@ def scaffold_django(
         # Create a temporary directory
         temp_dir = tempfile.mkdtemp()
 
+        project_name = project_name.replace(" ", "-")
+
         # Create virtual environment
         venv_path = os.path.join(temp_dir, "venv")
         subprocess.run(f"/usr/bin/python3 -m venv {venv_path}", shell=True, check=True)
@@ -109,10 +111,12 @@ def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
         # Create a temporary directory
         temp_dir = tempfile.mkdtemp()
 
+        project_name = config.project_name.replace(" ", "-")
+
         # Create app using Vite
         em_dashes = "--" if config.package_manager == "npm" else ""
         subprocess.run(
-            f"{config.package_manager} create vite{'@latest' if config.package_manager == 'npm' else ''} {config.project_name} {em_dashes} --template {config.template}",
+            f"{config.package_manager} create vite{'@latest' if config.package_manager == 'npm' else ''} {project_name} {em_dashes} --template {config.template}",
             shell=True,
             check=True,
             cwd=temp_dir,
@@ -159,6 +163,8 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
     try:
         temp_dir = tempfile.mkdtemp()
 
+        project_name = project_name.replace(" ", "-")
+
         # Create project using Composer
         subprocess.run(
             f"composer create-project --prefer-dist laravel/laravel {project_name}",
@@ -166,7 +172,7 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
             check=True,
             cwd=temp_dir,
         )
-        ctx.logger.info("PHP project created successfully.")
+        ctx.logger.info("Laravel project created successfully.")
 
         # Create zip file
         zip_path = create_zip_file(temp_dir, project_name)
@@ -203,6 +209,8 @@ def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str | None:
     """
     try:
         temp_dir = tempfile.mkdtemp()
+
+        project_name = project_name.replace(" ", "-")
 
         # Create Rails project
         subprocess.run(
