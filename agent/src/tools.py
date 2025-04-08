@@ -28,7 +28,7 @@ def scaffold_django(
 
         # Create virtual environment
         venv_path = os.path.join(temp_dir, "venv")
-        subprocess.run(f"python3 -m venv {venv_path}", shell=True, check=True)
+        subprocess.run(f"/usr/bin/python3 -m venv {venv_path}", shell=True, check=True)
 
         # Get path to pip and python in virtual environment
         pip_path = os.path.join(venv_path, "bin", "pip")
