@@ -14,6 +14,7 @@ class Configuration(BaseSettings):
     LLM_API_KEY: Optional[str] = None
     LLM_API_URL: Optional[str] = None
     MODEL: Optional[str] = "mistral-large-latest"
+    COMPOSER_HOME_DIR: str
 
     class Config:
         env_file = env_file = os.getenv(

@@ -5,8 +5,11 @@ import tempfile
 
 from uagents import Context
 
+from src.config import get_config
 from src.dataclasses import ViteConfig
 from src.utils import create_zip_file, move_zip_file, upload_to_s3
+
+config = get_config
 
 
 def scaffold_django(
@@ -165,9 +168,19 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
 
         project_name = project_name.replace(" ", "-")
 
+        # Set environment variables for Composer
+        env = os.environ.copy()
+        env.update(
+            {
+                "HOME": config.COMPOSER_HOME_DIR,
+                "COMPOSER_HOME": f"{config.COMPOSER_HOME_DIR}/.composer",
+                "PATH": f"{env['PATH']}:/usr/local/bin:/usr/bin",
+            }
+        )
+
         # Create project using Composer
         subprocess.run(
-            f"/usr/local/bin/composer create-project --prefer-dist laravel/laravel {project_name}",
+            f"composer create-project --prefer-dist laravel/laravel {project_name}",
             shell=True,
             check=True,
             cwd=temp_dir,
