@@ -5,11 +5,8 @@ import tempfile
 
 from uagents import Context
 
-from src.config import get_config
 from src.dataclasses import ViteConfig
 from src.utils import create_zip_file, move_zip_file, upload_to_s3
-
-config = get_config
 
 
 def scaffold_django(
@@ -172,8 +169,8 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
         env = os.environ.copy()
         env.update(
             {
-                "HOME": config.COMPOSER_HOME_DIR,
-                "COMPOSER_HOME": f"{config.COMPOSER_HOME_DIR}/.composer",
+                "HOME": "/home/manasseh",
+                "COMPOSER_HOME": "/home/manasseh/.composer",
                 "PATH": f"{env['PATH']}:/usr/local/bin:/usr/bin",
             }
         )
