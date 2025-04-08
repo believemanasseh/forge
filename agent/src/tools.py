@@ -181,6 +181,7 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
             shell=True,
             check=True,
             cwd=temp_dir,
+            env=env,
         )
         ctx.logger.info("Laravel project created successfully.")
 
