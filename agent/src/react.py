@@ -1,8 +1,8 @@
 import json
 from typing import Any
 
-from src.agent import Context
 from src.dataclasses import Action, ViteConfig
+from src.forge import Context
 from src.llm import call_llm
 from src.tools import scaffold_django, scaffold_vite
 
