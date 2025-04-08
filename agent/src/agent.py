@@ -13,7 +13,6 @@ agent = Agent(
     seed=config.SEED,
     endpoint=config.ENDPOINT,
     mailbox=config.MAILBOX,
-    store_message_history=True,
 )
 
 
