@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Optional
 
@@ -15,7 +16,9 @@ class Configuration(BaseSettings):
     MODEL: Optional[str] = "mistral-large-latest"
 
     class Config:
-        env_file = "../.env"
+        env_file = env_file = os.getenv(
+            "ENV_FILE", os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
+        )
         validate_assignment = True
 
 
