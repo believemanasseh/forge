@@ -39,7 +39,7 @@ const chatWithAgent = async (
       body: JSON.stringify({ query: arg.query }),
     });
     const jsonResponse = (await response.json()) as APIResponse;
-
+    console.log(jsonResponse, "jsonResponse");
     if (jsonResponse.data) {
       arg.setDownloadDetails({
         projectName: jsonResponse.data.action_args.project_name,
@@ -70,7 +70,6 @@ const ChatInterface = () => {
     url: "",
   });
   const chatEndRef = useRef<HTMLDivElement | null>(null);
-  console.log(import.meta.env.VITE_API_URL, "g");
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const { trigger, isMutating } = useSWRMutation(
     `${import.meta.env.VITE_API_URL}/chat`,
@@ -218,7 +217,7 @@ const ChatInterface = () => {
               </Dropdown>
               {downloadDetails.url && (
                 <div className="mt-10 border-t border-t-[#ccc] pt-5">
-                  <p>Your project is ready!</p>
+                  <p>Your project "{downloadDetails.projectName}" is ready!</p>
                   <Button
                     className="mt-5"
                     onClick={() => void handleDownload(downloadDetails.url)}
@@ -246,7 +245,7 @@ const ChatInterface = () => {
           </Dropdown>
           {downloadDetails.url && (
             <div className="mt-10 border-t border-t-[#ccc] pt-5">
-              <p>Your project is ready!</p>
+              <p>Your project "{downloadDetails.projectName}" is ready!</p>
               <Button
                 className="mt-5"
                 onClick={() => void handleDownload(downloadDetails.url)}
@@ -261,19 +260,29 @@ const ChatInterface = () => {
         <div className="flex flex-col m-auto max-h-[100%] xs:w-[100%] sm:w-[50%]">
           <div className="xs:h-[calc(100vh-100px)] m-auto xs:max-w-[90%] md:max-w-[100%] rounded-2xl p-5">
             <div className="w-[100%] m-auto">
-              {messages.map((message) => {
+              {messages.map((message, index) => {
                 if (message.sender === "ai") {
+                  const isLastMessage = index === messages.length - 1;
+                  const shouldSpin = isLastMessage && isMutating;
                   return (
                     <div
-                      className="bg-[whitesmoke] rounded-2xl mt-5 p-3 flex flex-row gap-5 max-w-[100%] items-start text-[var(--text-primary)]"
+                      className={`${
+                        theme === "light"
+                          ? "bg-[whitesmoke]"
+                          : "bg-[var(--bg-secondary)]"
+                      } rounded-2xl mt-5 p-3 flex flex-row gap-5 max-w-[100%] items-start text-[var(--text-primary)]`}
                       key={message.id}
                     >
                       <RobotOutlined
                         className={`${
-                          isMutating ? "animate-spin" : ""
+                          shouldSpin ? "animate-spin" : ""
                         } mt-1.5 flex-shrink-0`}
                       />
-                      <p className="m-auto max-w-[100%] break-words">
+                      <p
+                        className={`m-auto max-w-[100%] break-words ${
+                          theme === "dark" ? "text-white" : "text-black"
+                        }`}
+                      >
                         {message.text}
                       </p>
                     </div>
@@ -281,7 +290,11 @@ const ChatInterface = () => {
                 }
                 return (
                   <div
-                    className="bg-[whitesmoke] rounded-2xl m-[10px_auto] max-w-fit p-3 text-[var(--text-primary)]"
+                    className={`${
+                      theme === "light"
+                        ? "bg-[whitesmoke]"
+                        : "bg-[var(--bg-secondary)]"
+                    } rounded-2xl m-[10px_auto] max-w-fit p-3 text-[var(--text-primary)]`}
                     key={message.id}
                   >
                     <p className="m-auto max-w-[100%] break-words">
