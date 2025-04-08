@@ -35,7 +35,9 @@ def scaffold_django(
         python_path = os.path.join(venv_path, "bin", "python")
 
         # Install Django
-        subprocess.run(f"{pip_path} install django", shell=True, check=True)
+        subprocess.run(
+            f"{pip_path} install django", shell=True, check=True, cwd=temp_dir
+        )
         ctx.logger.info("Django installed successfully.")
 
         project_path = os.path.join(temp_dir, project_name)
