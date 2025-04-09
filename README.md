@@ -115,3 +115,7 @@ npm run dev
 "Scaffold a React app with TypeScript and SWC"
 "Initialize a Vue.js project"
 ```
+
+## 🎥 Demo
+
+[![Forge Demo](docs/assets/thumbnail.png)](https://youtu.be/uZLYIgtIRSE "Watch Demo")
