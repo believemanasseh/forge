@@ -38,6 +38,7 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 ## Agentverse
 
 - Forge Agent Address: [agent1q255rqw6shtmnwytv4jr2jlcak54s9f25059fpj9st3y4z9ltmywvvvqwgv](https://agentverse.ai/agents/details/agent1q255rqw6shtmnwytv4jr2jlcak54s9f25059fpj9st3y4z9ltmywvvvqwgv)
+- Forge Agent Details: [https://agentverse.ai/agents/details/agent1q255rqw6shtmnwytv4jr2jlcak54s9f25059fpj9st3y4z9ltmywvvvqwgv](https://agentverse.ai/agents/details/agent1q255rqw6shtmnwytv4jr2jlcak54s9f25059fpj9st3y4z9ltmywvvvqwgv)
 
 ## Data Models
 
