@@ -9,6 +9,8 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![React](https://img.shields.io/badge/React-18.x-blue)](https://reactjs.org/)
 [![Django](https://img.shields.io/badge/Django-green?logo=django)](https://www.djangoproject.com/)
+[![Laravel](https://img.shields.io/badge/Laravel-FF2D20?logo=laravel&logoColor=white)](https://laravel.com/)
+[![Ruby on Rails](https://img.shields.io/badge/Ruby%20on%20Rails-CC0000?logo=ruby-on-rails&logoColor=white)](https://rubyonrails.org/)
 [![Svelte](https://img.shields.io/badge/Svelte-orange?logo=svelte)](https://svelte.dev/)
 [![Preact](https://img.shields.io/badge/Preact-673AB8?logo=preact)](https://preactjs.com/)
 [![Lit](https://img.shields.io/badge/Lit-324FFF?logo=lit)](https://lit.dev/)
@@ -23,6 +25,8 @@ A lightweight, autonomous agent built using uAgents to facilitate intelligent pr
 - 🤖 Natural language project creation
 - 🎯 Supports multiple projects:
   - Django
+  - Laravel
+  - Ruby on Rails
   - React
   - Svelte
   - Preact

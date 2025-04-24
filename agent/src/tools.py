@@ -5,8 +5,11 @@ import tempfile
 
 from uagents import Context
 
+from src.config import get_config
 from src.dataclasses import ViteConfig
 from src.utils import create_zip_file, move_zip_file, upload_to_s3
+
+config = get_config()
 
 
 def scaffold_django(
@@ -30,7 +33,12 @@ def scaffold_django(
 
         # Create virtual environment
         venv_path = os.path.join(temp_dir, "venv")
-        subprocess.run(f"/usr/bin/python3 -m venv {venv_path}", shell=True, check=True)
+        subprocess.run(
+            f"python3 -m venv {venv_path}",
+            shell=True,
+            check=True,
+            env={"PATH": f"{os.environ['PATH']}:/usr/bin"},
+        )
 
         # Get path to pip and python in virtual environment
         pip_path = os.path.join(venv_path, "bin", "pip")
@@ -91,17 +99,23 @@ def scaffold_django(
         # Clean up temporary directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+            ctx.logger.info(f"Cleaned up temp direcotry: {temp_dir}")
+
+        # Clean up zip file
+        if final_zip_path and os.path.exists(final_zip_path):
+            os.remove(final_zip_path)
+            ctx.logger.info(f"Cleaned up zip file: {final_zip_path}")
 
     return s3_url
 
 
-def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
+def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
     """Scaffolds a project using Vite and returns the path to the zipped project.
     Supports various templates/frameworks including React, Vue, Svelte, Preact, Solid, Svelte, Qwik, Lit and Vanilla JavaScript/TypeScript.
 
     Args:
         ctx (Context): The agent context object
-        config (ViteConfig): Configuration object containing project settings
+        vite_config (ViteConfig): Configuration object containing project settings
                             including template choice and package manager
 
     Returns:
@@ -111,26 +125,32 @@ def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
         # Create a temporary directory
         temp_dir = tempfile.mkdtemp()
 
-        project_name = config.project_name.replace(" ", "-")
+        project_name = vite_config.project_name.replace(" ", "-")
 
         # Create app using Vite
-        em_dashes = "--" if config.package_manager == "npm" else ""
+        em_dashes = "--" if vite_config.package_manager == "npm" else ""
         subprocess.run(
-            f"{config.package_manager} create vite{'@latest' if config.package_manager == 'npm' else ''} {project_name} {em_dashes} --template {config.template}",
+            f"{vite_config.package_manager} create vite{'@latest' if vite_config.package_manager == 'npm' else ''} {project_name} {em_dashes} --template {vite_config.template}",
             shell=True,
             check=True,
             cwd=temp_dir,
+            env={
+                "PATH": f"{os.environ['PATH']}:{config.NODE_PATH}",
+            },
         )
         ctx.logger.info("Vite project created successfully.")
 
         # Create zip file
-        zip_path = create_zip_file(temp_dir, config.project_name)
+        zip_path = create_zip_file(temp_dir, vite_config.project_name)
         directory = "/tmp"
-        final_zip_path = move_zip_file(zip_path, directory, config.project_name)
+        final_zip_path = move_zip_file(zip_path, directory, vite_config.project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         s3_url = upload_to_s3(
-            ctx, final_zip_path, "forge-projects", f"projects/{config.project_name}.zip"
+            ctx,
+            final_zip_path,
+            "forge-projects",
+            f"projects/{vite_config.project_name}.zip",
         )
         if not s3_url:
             return None
@@ -146,6 +166,12 @@ def scaffold_vite(ctx: Context, config: ViteConfig) -> str | None:
         # Clean up temporary directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+            ctx.logger.info(f"Cleaned up temp direcotry: {temp_dir}")
+
+        # Clean up zip file
+        if final_zip_path and os.path.exists(final_zip_path):
+            os.remove(final_zip_path)
+            ctx.logger.info(f"Cleaned up zip file: {final_zip_path}")
 
     return s3_url
 
@@ -169,8 +195,7 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
         env = os.environ.copy()
         env.update(
             {
-                "HOME": "/home/manasseh",
-                "COMPOSER_HOME": "/home/manasseh/.composer",
+                "HOME": config.HOME_PATH,
                 "PATH": f"{env['PATH']}:/usr/local/bin:/usr/bin",
             }
         )
@@ -199,11 +224,18 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
 
         ctx.logger.info(f"Project uploaded successfully: {s3_url}")
     except Exception as e:
-        ctx.logger.error(f"Error creating PHP project: {str(e)}")
+        ctx.logger.error(f"Error creating Laravel project: {str(e)}")
         return None
     finally:
+        # Clean up temporary directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+            ctx.logger.info(f"Cleaned up temp direcotry: {temp_dir}")
+
+        # Clean up zip file
+        if final_zip_path and os.path.exists(final_zip_path):
+            os.remove(final_zip_path)
+            ctx.logger.info(f"Cleaned up zip file: {final_zip_path}")
 
     return s3_url
 
@@ -223,9 +255,18 @@ def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str | None:
 
         project_name = project_name.replace(" ", "-")
 
+        env = os.environ.copy()
+        env.update(
+            {
+                "GEM_HOME": config.GEM_HOME,
+                "GEM_PATH": config.GEM_PATH,
+                "PATH": f"{env['PATH']}:{config.RUBY_PATH}",
+            }
+        )
+
         # Create Rails project
         subprocess.run(
-            f"rails new {project_name}", shell=True, check=True, cwd=temp_dir
+            f"rails new {project_name}", shell=True, check=True, cwd=temp_dir, env=env
         )
         ctx.logger.info("Rails project created successfully.")
 
@@ -246,7 +287,14 @@ def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str | None:
         ctx.logger.error(f"Error creating Rails project: {str(e)}")
         return None
     finally:
+        # Clean up temporary directory
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
+            ctx.logger.info(f"Cleaned up temp direcotry: {temp_dir}")
+
+        # Clean up zip file
+        if final_zip_path and os.path.exists(final_zip_path):
+            os.remove(final_zip_path)
+            ctx.logger.info(f"Cleaned up zip file: {final_zip_path}")
 
     return s3_url

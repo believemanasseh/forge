@@ -2,6 +2,7 @@ from cosmpy.aerial.client import LedgerClient, NetworkConfig
 from uagents import Agent, Context
 
 from src.config import get_config
+from src.decorators import ratelimit
 from src.schemas import Request, Response
 
 config = get_config()
@@ -37,6 +38,7 @@ async def handle_startup(ctx: Context) -> None:
 
 
 @agent.on_rest_post("/chat", Request, Response)
+@ratelimit
 async def handle_post(ctx: Context, req: Request) -> Response:
     """
     Handles POST requests to the /chat endpoint.

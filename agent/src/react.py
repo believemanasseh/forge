@@ -179,7 +179,7 @@ async def begin_react_loop(
                         project_name=decision.get("project_name"),
                         package_manager=decision.get("package_manager"),
                     )
-                    result = action.function(ctx=ctx, config=config)
+                    result = action.function(ctx=ctx, vite_config=config)
                 else:
                     result = action.function(
                         ctx=ctx, project_name=decision.get("project_name")

@@ -88,3 +88,4 @@ htmlcov/
 
 private_keys.json
 *_data.json
+.vercel
