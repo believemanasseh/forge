@@ -1,20 +1,20 @@
-import { useState, useRef, useEffect } from "react";
-import send from "./assets/send.png";
+import { useState, useRef, useEffect, useCallback } from "react";
 import type { MenuProps } from "antd";
 import {
   SettingOutlined,
   SunOutlined,
   DownOutlined,
   QuestionOutlined,
-  RobotOutlined,
   MoonOutlined,
 } from "@ant-design/icons";
 
-import { Dropdown, Button, message, Space } from "antd";
+import { Dropdown, Button, message } from "antd";
 import { Squeeze as Hamburger } from "hamburger-react";
 import useSWRMutation from "swr/mutation";
 import { APIResponse, Message, DownloadDetails } from "./types";
 import { useTheme } from "./hooks";
+import { MessageItem } from "./components/MessageItem";
+import send from "./assets/send.png";
 
 const chatWithAgent = async (
   url: string,
@@ -82,20 +82,20 @@ const ChatInterface = () => {
   );
   const { theme, toggleTheme } = useTheme();
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(() => {
     if (input.trim()) {
       const newMessage: Message = {
         id: Date.now(),
         sender: "user",
         text: input,
       };
-      setMessages([...messages, newMessage]);
+      setMessages((prev) => [...prev, newMessage]);
       setInput("");
       if (textareaRef.current) {
         textareaRef.current.style.height = "50px"; // Reset height after sending
       }
     }
-  };
+  }, [input]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -171,7 +171,7 @@ const ChatInterface = () => {
     if (messages.length && messages[messages.length - 1].sender === "user") {
       void triggerChat();
     }
-  }, [messages, input, trigger, downloadDetails]);
+  }, [messages, trigger, downloadDetails]);
 
   // Manage textarea height
   useEffect(() => {
@@ -185,14 +185,15 @@ const ChatInterface = () => {
   }, [input]);
 
   useEffect(() => {
-    const handleResize = () => {
+    const checkMobile = () => {
       setMobile(window.innerWidth < 768);
       if (window.innerWidth < 768) setOpen(false);
     };
 
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [isMobile]);
 
   return (
     <div className="md:grid md:grid-cols-[20%_1fr] h-screen w-screen m-auto overflow-y-auto overflow-x-hidden bg-[var(--bg-primary)]">
@@ -202,17 +203,17 @@ const ChatInterface = () => {
             <Hamburger toggled={isOpen} toggle={setOpen} hideOutline rounded />
           </div>
           {isOpen && (
-            <div className="absolute top-0 left-0 h-screen w-[80%] bg-white shadow-lg z-10 text-center">
+            <div
+              className={`absolute top-0 left-0 h-screen w-[80%] shadow-lg z-10 text-center bg-[var(--bg-primary)]`}
+            >
               <Dropdown
-                className="m-5 border-none outline-none text-black hover:text-black text-black"
+                className="m-5 border-none outline-none text-[var(--primary)] bg-[var(--primary)]"
                 menu={menuProps}
                 placement="bottomRight"
               >
-                <Button className="mt-20 hover:text-black text-black hover:bg-black">
-                  <Space className="hover:text-black">
-                    Options
-                    <DownOutlined />
-                  </Space>
+                <Button className="mt-20 text-[var(--primary)] bg-[var(--primary)]">
+                  Options
+                  <DownOutlined />
                 </Button>
               </Dropdown>
               {downloadDetails.url && (
@@ -232,15 +233,13 @@ const ChatInterface = () => {
       ) : (
         <div className="border-r border-r-[#ccc] h-screen text-center">
           <Dropdown
-            className="m-5 border-none outline-none text-black hover:text-black text-black"
+            className="m-5 border-none outline-none bg-[var(--primary)]"
             menu={menuProps}
             placement="bottomRight"
           >
-            <Button className="hover:text-black text-black hover:bg-black">
-              <Space className="hover:text-black">
-                Options
-                <DownOutlined />
-              </Space>
+            <Button className="bg-[var(--primary)]">
+              Options
+              <DownOutlined />
             </Button>
           </Dropdown>
           {downloadDetails.url && (
@@ -258,51 +257,16 @@ const ChatInterface = () => {
       )}
       <div className="max-w-[100%] xs:overflow-y-auto xs:overflow-x-hidden">
         <div className="flex flex-col m-auto max-h-[100%] xs:w-[100%] sm:w-[50%]">
-          <div className="xs:h-[calc(100vh-100px)] m-auto xs:max-w-[90%] md:max-w-[100%] rounded-2xl p-5">
+          <div className="xs:h-[calc(100vh-100px)] m-auto xs:w-[90%] md:w-[100%] rounded-2xl p-5">
             <div className="w-[100%] m-auto">
-              {messages.map((message, index) => {
-                if (message.sender === "ai") {
-                  const isLastMessage = index === messages.length - 1;
-                  const shouldSpin = isLastMessage && isMutating;
-                  return (
-                    <div
-                      className={`${
-                        theme === "light"
-                          ? "bg-[whitesmoke]"
-                          : "bg-[var(--bg-secondary)]"
-                      } rounded-2xl mt-5 p-3 flex flex-row gap-5 max-w-[100%] items-start text-[var(--text-primary)]`}
-                      key={message.id}
-                    >
-                      <RobotOutlined
-                        className={`${
-                          shouldSpin ? "animate-spin" : ""
-                        } mt-1.5 flex-shrink-0`}
-                      />
-                      <p
-                        className={`m-auto max-w-[100%] break-words ${
-                          theme === "dark" ? "text-white" : "text-black"
-                        }`}
-                      >
-                        {message.text}
-                      </p>
-                    </div>
-                  );
-                }
-                return (
-                  <div
-                    className={`${
-                      theme === "light"
-                        ? "bg-[whitesmoke]"
-                        : "bg-[var(--bg-secondary)]"
-                    } rounded-2xl m-[10px_auto] max-w-fit p-3 text-[var(--text-primary)]`}
-                    key={message.id}
-                  >
-                    <p className="m-auto max-w-[100%] break-words">
-                      {message.text}
-                    </p>
-                  </div>
-                );
-              })}
+              {messages.map((message, index) => (
+                <MessageItem
+                  key={message.id}
+                  message={message}
+                  isLastMessage={index === messages.length - 1}
+                  isMutating={isMutating}
+                />
+              ))}
               <div ref={chatEndRef} />
             </div>
           </div>
@@ -317,11 +281,7 @@ const ChatInterface = () => {
           >
             <textarea
               ref={textareaRef}
-              className={`${
-                theme === "light"
-                  ? "text-[var(--text-secondary)] border-red-500"
-                  : "text-[var(--text-primary)] border-red-500"
-              } m-auto w-[100%] overflow-x-hidden overflow-y-auto outline-none resize-none p-3 rounded-lg`}
+              className="text-[var(--text-primary)] m-auto w-[100%] overflow-x-hidden overflow-y-auto outline-none resize-none p-3 rounded-lg"
               cols={100}
               placeholder="Type your message..."
               value={input}
@@ -330,7 +290,7 @@ const ChatInterface = () => {
             />
             <div className="flex mx-auto justify-end">
               <img
-                className="cursor-pointer w-[40px] h-auto"
+                className="cursor-pointer w-[40px] h-auto bg-white rounded-full"
                 src={send}
                 alt="send message"
                 onClick={() => {

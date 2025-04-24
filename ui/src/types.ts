@@ -53,3 +53,9 @@ export interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
 }
+
+export interface MessageItemProps {
+  message: Message;
+  isLastMessage: boolean;
+  isMutating: boolean;
+}
