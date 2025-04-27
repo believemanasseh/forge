@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { RobotOutlined } from "@ant-design/icons";
 import { MessageItemProps } from "../types";
+import TypeIt from "typeit-react";
 
 export const MessageItem = memo(
   ({ message, isLastMessage, isMutating }: MessageItemProps) => {
@@ -14,10 +15,7 @@ export const MessageItem = memo(
               } mt-1.5 flex-shrink-0`}
             />
             <p className="m-auto max-w-[100%] break-words text-[var(--text-primary)]">
-              {message.text}
-              {isLastMessage && isMutating && message.text === "" && (
-                <span className="typing-indicator">...</span>
-              )}
+              <TypeIt options={{ speed: 50 }}>{message.text}</TypeIt>
             </p>
           </div>
         </div>
