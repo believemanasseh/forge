@@ -38,22 +38,50 @@ const chatWithAgent = async (
       },
       body: JSON.stringify({ query: arg.query }),
     });
-    const jsonResponse = (await response.json()) as APIResponse;
-    console.log(jsonResponse, "jsonResponse");
-    if (jsonResponse.data) {
-      arg.setDownloadDetails({
-        projectName: jsonResponse.data.action_args.project_name,
-        url: jsonResponse.data.result,
-      });
-    }
+
+    if (!response.body) throw new Error("No response body");
 
     const aiMessage: Message = {
       id: Date.now(),
       sender: "ai",
-      text: jsonResponse.message,
+      text: "",
     };
 
     arg.setter([...arg.getter, aiMessage]);
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let accumulatedText = "";
+
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value);
+      accumulatedText += chunk;
+
+      // Update the last message with accumulated text
+      arg.setter(
+        arg.getter.map(
+          (msg: Message, index: number): Message =>
+            index === arg.getter.length - 1
+              ? { ...msg, text: accumulatedText }
+              : msg
+        )
+      );
+    }
+
+    // Handle download details if present
+    try {
+      const jsonResponse = JSON.parse(accumulatedText) as APIResponse;
+      if (jsonResponse.data) {
+        arg.setDownloadDetails({
+          projectName: jsonResponse.data.action_args.project_name,
+          url: jsonResponse.data.result,
+        });
+      }
+    } catch (e) {
+      console.log(`Not a JSON response: ${e as Error}`);
+    }
   } catch (err) {
     message.error(`An error occurred: ${err as Error}`);
     console.error("Error:", err);

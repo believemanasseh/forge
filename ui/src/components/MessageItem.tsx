@@ -15,6 +15,9 @@ export const MessageItem = memo(
             />
             <p className="m-auto max-w-[100%] break-words text-[var(--text-primary)]">
               {message.text}
+              {isLastMessage && isMutating && message.text === "" && (
+                <span className="typing-indicator">...</span>
+              )}
             </p>
           </div>
         </div>
