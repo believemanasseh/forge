@@ -135,7 +135,7 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
             check=True,
             cwd=temp_dir,
             env={
-                "PATH": f"{os.environ['PATH']}:{config.NODE_PATH}",
+                "PATH": f"{os.environ['PATH']}:{config.NODE_PATH}:/usr/local/bin:/usr/bin",
             },
         )
         ctx.logger.info("Vite project created successfully.")
