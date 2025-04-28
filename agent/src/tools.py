@@ -6,7 +6,7 @@ import tempfile
 from uagents import Context
 
 from src.config import get_config
-from src.dataclasses import ViteConfig
+from src.dataclasses import ComposerConfig, ViteConfig
 from src.utils import create_zip_file, move_zip_file, upload_to_s3
 
 config = get_config()
@@ -176,12 +176,12 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
     return s3_url
 
 
-def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | None:
-    """Scaffolds a Laravel project with Composer and returns the path to the zipped project.
+def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | None:
+    """Scaffolds various PHP projects using Composer and returns the path to the zipped project.
 
     Args:
         ctx (Context): The agent context object
-        project_name (str, optional): Name of the PHP project. Defaults to "myproject"
+        composer_config (ComposerConfig): Configuration object for the PHP project.
 
     Returns:
         str | None: Path to the zipped project if successful, None otherwise
@@ -189,7 +189,7 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
     try:
         temp_dir = tempfile.mkdtemp()
 
-        project_name = project_name.replace(" ", "-")
+        project_name = composer_config.project_name.replace(" ", "-")
 
         # Set environment variables for Composer
         env = os.environ.copy()
@@ -200,9 +200,29 @@ def scaffold_laravel(ctx: Context, project_name: str = "myproject") -> str | Non
             }
         )
 
+        # Define create commands for different project types
+        create_commands = {
+            "laravel": f"composer create-project --prefer-dist laravel/laravel {project_name}",
+            "symfony": f"composer create-project symfony/website-skeleton {project_name}",
+            "drupal": f"composer create-project drupal/recommended-project {project_name}",
+            "wordpress": f"composer create-project roots/bedrock {project_name}",
+            "cakephp": f"composer create-project --prefer-dist cakephp/app {project_name}",
+            "phpbb": f"composer create-project phpbb/phpbb {project_name}",
+            "magento": f"composer create-project --repository-url=https://repo.magento.com/ magento/project-community-edition {project_name}",
+            "joomla": f"composer create-project joomla/joomla-cms {project_name}",
+            "octobercms": f"composer create-project october/october {project_name}",
+            "silverstripe": f"composer create-project silverstripe/installer {project_name}",
+        }
+
+        if composer_config.template not in create_commands:
+            ctx.logger.error(
+                f"Unsupported PHP project type: {composer_config.template}"
+            )
+            return None
+
         # Create project using Composer
         subprocess.run(
-            f"composer create-project --prefer-dist laravel/laravel {project_name}",
+            create_commands[composer_config.template],
             shell=True,
             check=True,
             cwd=temp_dir,

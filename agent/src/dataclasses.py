@@ -33,3 +33,20 @@ class ViteConfig:
     ]
     project_name: str = "myproject"
     package_manager: Literal["npx", "npm", "yarn", "pnpm"] = "npm"
+
+
+@dataclass
+class ComposerConfig:
+    template: Literal[
+        "laravel",
+        "symfony",
+        "drupal",
+        "wordpress",
+        "cakephp",
+        "phpbb",
+        "magento",
+        "joomla",
+        "octobercms",
+        "silverstripe",
+    ]
+    project_name: str = "myproject"
