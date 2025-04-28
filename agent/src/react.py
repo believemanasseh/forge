@@ -1,10 +1,10 @@
 import json
 from typing import Any
 
-from src.dataclasses import Action, ViteConfig
+from src.dataclasses import Action, ComposerConfig, ViteConfig
 from src.forge import Context
 from src.llm import call_llm
-from src.tools import scaffold_django, scaffold_laravel, scaffold_rails, scaffold_vite
+from src.tools import scaffold_composer, scaffold_django, scaffold_rails, scaffold_vite
 
 ACTIONS = {
     "scaffold_django": Action(
@@ -17,10 +17,10 @@ ACTIONS = {
         description="Create a new React, Vue, Svelte, Preact, Solid, Svelte, Qwik, Lit and Vanilla JavaScript/TypeScript scaffold",
         function=scaffold_vite,
     ),
-    "scaffold_laravel": Action(
-        name="scaffold_laravel",
-        description="Create a new Laravel project scaffold",
-        function=scaffold_laravel,
+    "scaffold_composer": Action(
+        name="scaffold_composer",
+        description="Create a new Laravel, Symfony, CakePHP, Drupal, WordPress, phpBB, Magento, Joomla, OctoberCMS, or SilverStripe project scaffold",
+        function=scaffold_composer,
     ),
     "scaffold_rails": Action(
         name="scaffold_rails",
@@ -80,6 +80,10 @@ Thought: User wants a Svelte project with TypeScript and Yarn
 Action: scaffold_vite
 Action Args: {{"project_name": "my-svelte-app", "template": "svelte-ts", "package_manager": "yarn"}}
 
+User: "Create a Laravel project called myblog"
+Thought: User wants a Laravel project scaffold with name 'myblog'
+Action: scaffold_composer
+Action Args: {{"project_name": "myblog", "template": "laravel"}}
 
 User: "What's the difference between Django and Flask?"
 Thought: User is asking for information about web frameworks
@@ -125,8 +129,12 @@ def parse_llm_response(response: str) -> dict[str, Any]:
             except json.JSONDecodeError:
                 result["action_args"] = {}
                 result["project_name"] = "myproject"
-                result["template"] = "vanilla"
-                result["package_manager"] = "npm"
+                result["template"] = (
+                    "vanilla" if result["action"] == "scaffold_vite" else "laravel"
+                )
+                result["package_manager"] = (
+                    "npm" if result["action"] == "scaffold_vite" else None
+                )
         elif line.startswith("Response:"):
             result["response"] = line[9:].strip()
 
@@ -180,6 +188,12 @@ async def begin_react_loop(
                         package_manager=decision.get("package_manager"),
                     )
                     result = action.function(ctx=ctx, vite_config=config)
+                elif action_name == "scaffold_composer":
+                    config = ComposerConfig(
+                        template=decision.get("template"),
+                        project_name=decision.get("project_name"),
+                    )
+                    result = action.function(ctx=ctx, composer_config=config)
                 else:
                     result = action.function(
                         ctx=ctx, project_name=decision.get("project_name")
