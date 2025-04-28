@@ -200,7 +200,7 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
             }
         )
 
-        # Define create commands for different project types
+        # Create commands for different project types
         create_commands = {
             "laravel": f"composer create-project --prefer-dist laravel/laravel {project_name}",
             "symfony": f"composer create-project symfony/skeleton {project_name}",
@@ -228,7 +228,9 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
             cwd=temp_dir,
             env=env,
         )
-        ctx.logger.info("Laravel project created successfully.")
+        ctx.logger.info(
+            f"{composer_config.template.capitalize()} project created successfully."
+        )
 
         # Create zip file
         zip_path = create_zip_file(temp_dir, project_name)
@@ -244,7 +246,7 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
 
         ctx.logger.info(f"Project uploaded successfully: {s3_url}")
     except Exception as e:
-        ctx.logger.error(f"Error creating Laravel project: {str(e)}")
+        ctx.logger.error(f"Error creating PHP project: {str(e)}")
         return None
     finally:
         # Clean up temporary directory
