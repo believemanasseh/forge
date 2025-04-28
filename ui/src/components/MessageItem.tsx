@@ -15,7 +15,9 @@ export const MessageItem = memo(
               } mt-1.5 flex-shrink-0`}
             />
             <p className="m-auto max-w-[100%] break-words text-[var(--text-primary)]">
-              <TypeIt options={{ speed: 50 }}>{message.text}</TypeIt>
+              <TypeIt options={{ speed: 50, cursor: false }}>
+                {message.text}
+              </TypeIt>
             </p>
           </div>
         </div>
