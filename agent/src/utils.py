@@ -46,13 +46,13 @@ def move_zip_file(zip_path: str, directory: str, project_name: str) -> str:
         raise OSError(f"Failed to move zip file: {e}") from e
 
 
-def upload_to_s3(ctx: Context, file_path: str, object_name: str) -> str | None:
+def upload_to_s3(ctx: Context, file_path: str, file_name: str) -> str | None:
     """Upload a file to an S3 bucket and return the public URL.
 
     Args:
         ctx (Context): The agent context object
         file_path (str): File to upload
-        object_name (str): S3 object name.
+        file_name (str): S3 object file name.
 
     Returns:
         str | None: Public URL of the uploaded file if successful, None otherwise
@@ -65,10 +65,11 @@ def upload_to_s3(ctx: Context, file_path: str, object_name: str) -> str | None:
 
     try:
         bucket = "forge-projects"
+        object_name = f"projects/{file_name}.zip"
         s3_client.upload_file(
             file_path, bucket, object_name, ExtraArgs={"ACL": "public-read"}
         )
-        url = f"https://{bucket}.s3.amazonaws.com/projects/{object_name}.zip"
+        url = f"https://{bucket}.s3.amazonaws.com/{object_name}"
         ctx.logger.info(f"{url} uploaded to S3")
         return url
     except ClientError as e:
