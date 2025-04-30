@@ -82,9 +82,7 @@ def scaffold_django(
         final_zip_path = move_zip_file(zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
-        s3_url = upload_to_s3(
-            ctx, final_zip_path, "forge-projects", f"projects/{project_name}.zip"
-        )
+        s3_url = upload_to_s3(ctx, final_zip_path, project_name)
         if not s3_url:
             return None
 
@@ -146,12 +144,7 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
         final_zip_path = move_zip_file(zip_path, directory, vite_config.project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
-        s3_url = upload_to_s3(
-            ctx,
-            final_zip_path,
-            "forge-projects",
-            f"projects/{vite_config.project_name}.zip",
-        )
+        s3_url = upload_to_s3(ctx, final_zip_path, vite_config.project_name)
         if not s3_url:
             return None
 
@@ -238,9 +231,7 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
         final_zip_path = move_zip_file(zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
-        s3_url = upload_to_s3(
-            ctx, final_zip_path, "forge-projects", f"projects/{project_name}.zip"
-        )
+        s3_url = upload_to_s3(ctx, final_zip_path, project_name)
         if not s3_url:
             return None
 
@@ -298,9 +289,7 @@ def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str | None:
         final_zip_path = move_zip_file(zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
-        s3_url = upload_to_s3(
-            ctx, final_zip_path, "forge-projects", f"projects/{project_name}.zip"
-        )
+        s3_url = upload_to_s3(ctx, final_zip_path, project_name)
         if not s3_url:
             return None
 

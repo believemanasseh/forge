@@ -35,39 +35,40 @@ def move_zip_file(zip_path: str, directory: str, project_name: str) -> str:
     Raises:
         OSError: If the /tmp directory does not exist or if the move operation fails.
     """
-    # Move zip file to /tmp directory
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    final_zip_path = os.path.join(directory, f"{project_name}.zip")
-    shutil.move(zip_path, final_zip_path)
-    return final_zip_path
+    try:
+        # Move zip file to /tmp directory
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        final_zip_path = os.path.join(directory, f"{project_name}.zip")
+        shutil.move(zip_path, final_zip_path)
+        return final_zip_path
+    except OSError as e:
+        raise OSError(f"Failed to move zip file: {e}") from e
 
 
-def upload_to_s3(
-    ctx: Context, file_path: str, bucket: str, object_name: str = None
-) -> str | None:
+def upload_to_s3(ctx: Context, file_path: str, object_name: str) -> str | None:
     """Upload a file to an S3 bucket and return the public URL.
 
     Args:
         ctx (Context): The agent context object
         file_path (str): File to upload
-        bucket (str): Bucket to upload to
-        object_name (str): S3 object name. If not specified, file_path is used
+        object_name (str): S3 object name.
 
     Returns:
         str | None: Public URL of the uploaded file if successful, None otherwise
-    """
-    if object_name is None:
-        object_name = os.path.basename(file_path)
 
+    Raises:
+        ClientError: If the upload fails
+    """
     session = boto3.Session()
     s3_client = session.client(service_name="s3")
 
     try:
+        bucket = "forge-projects"
         s3_client.upload_file(
             file_path, bucket, object_name, ExtraArgs={"ACL": "public-read"}
         )
-        url = f"https://{bucket}.s3.amazonaws.com/{object_name}"
+        url = f"https://{bucket}.s3.amazonaws.com/projects/{object_name}.zip"
         ctx.logger.info(f"{url} uploaded to S3")
         return url
     except ClientError as e:
