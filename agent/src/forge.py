@@ -20,13 +20,13 @@ agent = Agent(
 @agent.on_event("startup")
 async def handle_startup(ctx: Context) -> None:
     """
-    Startup event handler that initialises the agent
+    Startup event handler that initialises the agent.
 
     Args:
-        ctx (Context): The agent context object
+        ctx (Context): The agent context object.
 
     Returns:
-        None: This function doesn't return anything
+        None: This function doesn't return anything.
     """
     ctx.logger.info(
         f"Hello, I'm agent {agent.name} and my address is {agent.address}. My wallet address is {agent.wallet.address()}"
@@ -44,24 +44,28 @@ async def handle_post(ctx: Context, req: Request) -> Response:
     Handles POST requests to the /chat endpoint.
 
     Args:
-        ctx (Context): The agent context object
-        req (Request): The incoming request containing the query
+        ctx (Context): The agent context object.
+        req (Request): The incoming request containing the query.
 
     Returns:
-        Response: Contains status, response message, and ReAct loop result
+        Response: Contains status, response message, and ReAct loop result.
     """
     from src.react import begin_react_loop
 
     if not req.query:
         return Response(status="error", message="Query is empty")
 
-    data = await begin_react_loop(ctx, req.query)
-    if data["action"]:
-        return Response(
-            status="success", message="Project scaffolded successfully", data=data
-        )
+    try:
+        data = await begin_react_loop(ctx, req.query)
+        if data["action"]:
+            return Response(
+                status="success", message="Project scaffolded successfully", data=data
+            )
 
-    return Response(status="success", message=data["response"])
+        return Response(status="success", message=data["response"])
+    except Exception as e:
+        ctx.logger.error(f"Error in ReAct loop: {e}")
+        return Response(status="error", message=str(e))
 
 
 @agent.on_message(Request)

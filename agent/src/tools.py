@@ -12,18 +12,20 @@ from src.utils import create_zip_file, move_zip_file, upload_to_s3
 config = get_config()
 
 
-def scaffold_django(
-    ctx: Context,
-    project_name: str = "myproject",
-) -> str | None:
+def scaffold_django(ctx: Context, project_name: str = "myproject") -> str:
     """Scaffolds a Django project and returns the path to the zipped project.
 
     Args:
-        ctx (Context): The agent context object
-        project_name (str, optional): Name of the Django project. Defaults to "myproject"
+        ctx (Context): The agent context object.
+        project_name (str, optional): Name of the Django project. Defaults to "myproject".
 
     Returns:
-        str | None: Path to the zipped project if successful, None otherwise
+        str: Path to the zipped project.
+
+    Raises:
+        OSError: If the /tmp directory does not exist or if the move operation fails.
+        subprocess.CalledProcessError: If the command to create the Django project fails.
+        Exception: If any error occurs during the project creation or zipping process.
     """
     try:
         # Create a temporary directory
@@ -50,49 +52,40 @@ def scaffold_django(
         )
         ctx.logger.info("Django installed successfully.")
 
-        project_path = os.path.join(temp_dir, project_name)
-        if os.path.exists(project_path):
-            ctx.logger.error(
-                f"Project '{project_name}' already exists at {project_path}"
-            )
-            return None
-
         # Create Django project
-        try:
-            os.chdir(temp_dir)
-            subprocess.run(
-                f"{python_path} -m django startproject {project_name}",
-                shell=True,
-                check=True,
-            )
-        except subprocess.CalledProcessError as e:
-            if "already exists" in e.stderr:
-                ctx.logger.error(f"Project '{project_name}' already exists")
-            else:
-                ctx.logger.error(f"Failed to create project: {e.stderr}")
-            return None
+        subprocess.run(
+            f"{python_path} -m django startproject {project_name}",
+            shell=True,
+            check=True,
+            cwd=temp_dir,
+        )
 
         # Create requirements.txt
-        subprocess.run(f"{pip_path} freeze > requirements.txt", shell=True, check=True)
+        subprocess.run(
+            f"{pip_path} freeze > requirements.txt",
+            shell=True,
+            check=True,
+            cwd=temp_dir,
+        )
         ctx.logger.info("requirements.txt created successfully.")
 
         # Create zip file
-        zip_path = create_zip_file(temp_dir, project_name)
+        zip_path = create_zip_file(ctx, temp_dir, project_name)
         directory = "/tmp"
-        final_zip_path = move_zip_file(zip_path, directory, project_name)
+        final_zip_path = move_zip_file(ctx, zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         s3_url = upload_to_s3(ctx, final_zip_path, project_name)
-        if not s3_url:
-            return None
-
         ctx.logger.info(f"Project uploaded successfully: {s3_url}")
+    except OSError as e:
+        ctx.logger.error(f"Filesystem operation failed: {str(e)}")
+        raise
     except subprocess.CalledProcessError as e:
-        ctx.logger.error(f"Command failed: {str(e)}")
-        return None
+        ctx.logger.error(f"Subprocess command failed: {str(e)}")
+        raise
     except Exception as e:
         ctx.logger.error(f"Error creating Django project: {str(e)}")
-        return None
+        raise
     finally:
         # Clean up temporary directory
         if os.path.exists(temp_dir):
@@ -112,12 +105,17 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
     Supports various templates/frameworks including React, Vue, Svelte, Preact, Solid, Svelte, Qwik, Lit and Vanilla JavaScript/TypeScript.
 
     Args:
-        ctx (Context): The agent context object
+        ctx (Context): The agent context object.
         vite_config (ViteConfig): Configuration object containing project settings
-                            including template choice and package manager
+                            including template choice and package manager.
 
     Returns:
-        str | None: Path to the zipped project if successful, None otherwise
+        str: Path to the zipped project
+
+    Raises:
+        OSError: If the /tmp directory does not exist or if the move operation fails.
+        subprocess.CalledProcessError: If the command to create the Vite project fails.
+        Exception: If any error occurs during the project creation or zipping process.
     """
     try:
         # Create a temporary directory
@@ -139,22 +137,24 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
         ctx.logger.info("Vite project created successfully.")
 
         # Create zip file
-        zip_path = create_zip_file(temp_dir, vite_config.project_name)
+        zip_path = create_zip_file(ctx, temp_dir, vite_config.project_name)
         directory = "/tmp"
-        final_zip_path = move_zip_file(zip_path, directory, vite_config.project_name)
+        final_zip_path = move_zip_file(
+            ctx, zip_path, directory, vite_config.project_name
+        )
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         s3_url = upload_to_s3(ctx, final_zip_path, vite_config.project_name)
-        if not s3_url:
-            return None
-
         ctx.logger.info(f"Project uploaded successfully: {s3_url}")
+    except OSError as e:
+        ctx.logger.error(f"Filesystem operation failed: {str(e)}")
+        raise
     except subprocess.CalledProcessError as e:
-        ctx.logger.error(f"Command failed: {str(e)}")
-        return None
+        ctx.logger.error(f"Subprocess command failed: {str(e)}")
+        raise
     except Exception as e:
         ctx.logger.error(f"Error creating Vite project: {str(e)}")
-        return None
+        raise
     finally:
         # Clean up temporary directory
         if os.path.exists(temp_dir):
@@ -169,15 +169,20 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
     return s3_url
 
 
-def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | None:
+def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str:
     """Scaffolds various PHP projects using Composer and returns the path to the zipped project.
 
     Args:
-        ctx (Context): The agent context object
+        ctx (Context): The agent context object.
         composer_config (ComposerConfig): Configuration object for the PHP project.
 
     Returns:
-        str | None: Path to the zipped project if successful, None otherwise
+        str: Path to the zipped project.
+
+    Raises:
+        OSError: If the /tmp directory does not exist or if the move operation fails.
+        subprocess.CalledProcessError: If the command to create the Composer project fails.
+        Exception: If any error occurs during the project creation or zipping process.
     """
     try:
         temp_dir = tempfile.mkdtemp()
@@ -207,12 +212,6 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
             "silverstripe": f"composer create-project silverstripe/installer {project_name}",
         }
 
-        if composer_config.template not in create_commands:
-            ctx.logger.error(
-                f"Unsupported PHP project type: {composer_config.template}"
-            )
-            return None
-
         # Create project using Composer
         subprocess.run(
             create_commands[composer_config.template],
@@ -226,19 +225,22 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
         )
 
         # Create zip file
-        zip_path = create_zip_file(temp_dir, project_name)
+        zip_path = create_zip_file(ctx, temp_dir, project_name)
         directory = "/tmp"
-        final_zip_path = move_zip_file(zip_path, directory, project_name)
+        final_zip_path = move_zip_file(ctx, zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         s3_url = upload_to_s3(ctx, final_zip_path, project_name)
-        if not s3_url:
-            return None
-
         ctx.logger.info(f"Project uploaded successfully: {s3_url}")
+    except OSError as e:
+        ctx.logger.error(f"Filesystem operation failed: {str(e)}")
+        raise
+    except subprocess.CalledProcessError as e:
+        ctx.logger.error(f"Subprocess command failed: {str(e)}")
+        raise
     except Exception as e:
         ctx.logger.error(f"Error creating PHP project: {str(e)}")
-        return None
+        raise
     finally:
         # Clean up temporary directory
         if os.path.exists(temp_dir):
@@ -253,15 +255,20 @@ def scaffold_composer(ctx: Context, composer_config: ComposerConfig) -> str | No
     return s3_url
 
 
-def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str | None:
+def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str:
     """Scaffolds a Ruby on Rails project and returns the path to the zipped project.
 
     Args:
-        ctx (Context): The agent context object
-        project_name (str, optional): Name of the Rails project. Defaults to "myproject"
+        ctx (Context): The agent context object.
+        project_name (str, optional): Name of the Rails project. Defaults to "myproject".
 
     Returns:
-        str | None: Path to the zipped project if successful, None otherwise
+        str: Path to the zipped project.
+
+    Raises:
+        OSError: If the /tmp directory does not exist or if the move operation fails.
+        subprocess.CalledProcessError: If the command to create the Rails project fails.
+        Exception: If any error occurs during the project creation or zipping process.
     """
     try:
         temp_dir = tempfile.mkdtemp()
@@ -284,19 +291,22 @@ def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str | None:
         ctx.logger.info("Rails project created successfully.")
 
         # Create zip file
-        zip_path = create_zip_file(temp_dir, project_name)
+        zip_path = create_zip_file(ctx, temp_dir, project_name)
         directory = "/tmp"
-        final_zip_path = move_zip_file(zip_path, directory, project_name)
+        final_zip_path = move_zip_file(ctx, ctx, zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         s3_url = upload_to_s3(ctx, final_zip_path, project_name)
-        if not s3_url:
-            return None
-
         ctx.logger.info(f"Project uploaded successfully: {s3_url}")
+    except OSError as e:
+        ctx.logger.error(f"Filesystem operation failed: {str(e)}")
+        raise
+    except subprocess.CalledProcessError as e:
+        ctx.logger.error(f"Subprocess command failed: {str(e)}")
+        raise
     except Exception as e:
         ctx.logger.error(f"Error creating Rails project: {str(e)}")
-        return None
+        raise
     finally:
         # Clean up temporary directory
         if os.path.exists(temp_dir):

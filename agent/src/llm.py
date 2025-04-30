@@ -2,19 +2,21 @@ from http.client import OK
 from typing import Any
 
 import aiohttp
+from uagents import Context
 
 from src.config import get_config
 
 config = get_config()
 
 
-async def call_llm(content: str, role: str = "user") -> dict[str, Any]:
+async def call_llm(ctx: Context, content: str, role: str = "user") -> dict[str, Any]:
     """Makes an asynchronous API call to a large language model service.
 
     This function sends a request to a specified LLM API endpoint with messages containing
     a system prompt and user content. It handles the API communication and error cases.
 
     Args:
+        ctx (Context): The agent context object.
         content (str): The message content to send to the LLM.
         role (str, optional): The role of the message sender. Defaults to "user".
 
@@ -22,8 +24,8 @@ async def call_llm(content: str, role: str = "user") -> dict[str, Any]:
         dict[str, Any]: The JSON response from the LLM API containing the model's output.
 
     Raises:
-        SystemExit: If the API request fails due to connection or response errors.
         aiohttp.ClientResponseError: If the API returns a non-200 status code.
+        aiohttp.ClientError: If there is a network error during the API request.
 
     Example:
         >>> response = await call_llm("Create a new Flask project")
@@ -63,4 +65,5 @@ async def call_llm(content: str, role: str = "user") -> dict[str, Any]:
                     )
                 return await response.json()
     except aiohttp.ClientError as e:
-        raise SystemExit(f"API request failed: {str(e)}")
+        ctx.logger.error(f"API request failed: {str(e)}")
+        raise

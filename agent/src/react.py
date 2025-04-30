@@ -155,8 +155,12 @@ async def begin_react_loop(
         dict[str, Any]: Dictionary containing:
             - thought: The AI's reasoning about the request
             - action: Name of the action executed, if any
+            - action_args: Arguments for the action, if any
             - result: Result of the executed action, if any
             - response: Text response for informational queries
+
+    Raises:
+        Exception: If an error occurs during action execution or LLM querying.
     """
     step = 0
     result = None
@@ -166,21 +170,21 @@ async def begin_react_loop(
     )
 
     while step < max_steps:
-        ctx.logger.info("Querying LLM")
-        response = await call_llm(
-            PROMPT.format(actions=action_descriptions, input=user_input)
-        )
+        try:
+            ctx.logger.info("Querying LLM")
+            response = await call_llm(
+                ctx, PROMPT.format(actions=action_descriptions, input=user_input)
+            )
 
-        ctx.logger.info("Parsing LLM response")
-        decision = parse_llm_response(response["choices"][0]["message"]["content"])
+            ctx.logger.info("Parsing LLM response")
+            decision = parse_llm_response(response["choices"][0]["message"]["content"])
 
-        ctx.logger.info(f"Thought: {decision.get('thought')}")
+            ctx.logger.info(f"Thought: {decision.get('thought')}")
 
-        # Execute action if chosen
-        action_name = decision.get("action")
-        if action_name and action_name in ACTIONS:
-            action = ACTIONS[action_name]
-            try:
+            # Execute action if chosen
+            action_name = decision.get("action")
+            if action_name and action_name in ACTIONS:
+                action = ACTIONS[action_name]
                 if action_name == "scaffold_vite":
                     config = ViteConfig(
                         template=decision.get("template"),
@@ -201,8 +205,9 @@ async def begin_react_loop(
 
                 if result:
                     break
-            except Exception as e:
-                ctx.logger.error(f"Action failed: {str(e)}")
+        except Exception as e:
+            ctx.logger.error(f"Action failed: {str(e)}")
+            raise
 
         step += 1
 

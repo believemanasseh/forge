@@ -6,7 +6,7 @@ name = "pypi"
 [packages]
 uagents = "==0.21.0"
 pydantic-settings = "==2.8.1"
-aiohttp = {extras = ["speedups"], version = "==3.11.14"}
+aiohttp = {extras = ["speedups"], version = "==3.11.18"}
 boto3 = "==1.37.28"
 ratelimit = "==2.2.1"
 
