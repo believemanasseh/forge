@@ -104,11 +104,6 @@ const ChatInterface = () => {
     }
   };
 
-  const handleMenuClick: MenuProps["onClick"] = (e) => {
-    message.info("Yo!");
-    console.log(e);
-  };
-
   const items: MenuProps["items"] = [
     {
       label: "Toggle theme",
@@ -120,16 +115,25 @@ const ChatInterface = () => {
           `Switched to ${theme === "light" ? "dark" : "light"} theme`
         );
       },
+      style: {
+        color: "var(--text-primary)",
+      },
     },
     {
       label: "Settings",
       key: "2",
       icon: <SettingOutlined />,
+      style: {
+        color: "var(--text-primary)",
+      },
     },
     {
       label: "Help",
       key: "3",
       icon: <QuestionOutlined />,
+      style: {
+        color: "var(--text-primary)",
+      },
     },
   ];
 
@@ -152,10 +156,7 @@ const ChatInterface = () => {
     }
   };
 
-  const menuProps = {
-    items,
-    onClick: handleMenuClick,
-  };
+  const menuProps = { items };
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -208,10 +209,22 @@ const ChatInterface = () => {
             >
               <Dropdown
                 className="m-5 border-none outline-none text-[var(--primary)] bg-[var(--primary)]"
-                menu={menuProps}
+                menu={{
+                  ...menuProps,
+                  style: {
+                    backgroundColor: "var(--bg-primary)",
+                  },
+                }}
                 placement="bottomRight"
               >
-                <Button className="mt-20 text-[var(--primary)] bg-[var(--primary)]">
+                <Button
+                  className="mt-20"
+                  style={{
+                    backgroundColor: "var(--bg-primary)",
+                    color: "var(--text-primary)",
+                    borderColor: "var(--text-primary)",
+                  }}
+                >
                   Options
                   <DownOutlined />
                 </Button>
@@ -222,6 +235,11 @@ const ChatInterface = () => {
                   <Button
                     className="mt-5"
                     onClick={() => void handleDownload(downloadDetails.url)}
+                    style={{
+                      backgroundColor: "var(--bg-primary)",
+                      color: "var(--text-primary)",
+                      borderColor: "var(--text-primary)",
+                    }}
                   >
                     Download
                   </Button>
@@ -233,11 +251,23 @@ const ChatInterface = () => {
       ) : (
         <div className="border-r border-r-[#ccc] h-screen text-center">
           <Dropdown
-            className="m-5 border-none outline-none bg-[var(--primary)]"
-            menu={menuProps}
+            className="m-5 border-none outline-none bg-[var(--bg-primary)]"
+            menu={{
+              ...menuProps,
+              style: {
+                backgroundColor: "var(--bg-primary)",
+                color: "white",
+              },
+            }}
             placement="bottomRight"
           >
-            <Button className="bg-[var(--primary)]">
+            <Button
+              style={{
+                backgroundColor: "var(--bg-primary)",
+                color: "var(--text-primary)",
+                borderColor: "var(--text-primary)",
+              }}
+            >
               Options
               <DownOutlined />
             </Button>
@@ -248,6 +278,11 @@ const ChatInterface = () => {
               <Button
                 className="mt-5"
                 onClick={() => void handleDownload(downloadDetails.url)}
+                style={{
+                  backgroundColor: "var(--bg-primary)",
+                  color: "var(--text-primary)",
+                  borderColor: "var(--text-primary)",
+                }}
               >
                 Download
               </Button>
