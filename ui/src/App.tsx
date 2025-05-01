@@ -27,6 +27,7 @@ const chatWithAgent = async (
       setter: (arg: Message[]) => void;
       downloadDetails: DownloadDetails;
       setDownloadDetails: (arg: DownloadDetails) => void;
+      setCanTrigger: (arg: boolean) => void;
     };
   }
 ) => {
@@ -47,16 +48,16 @@ const chatWithAgent = async (
       });
     }
 
-    const aiMessage: Message = {
+    const messages = [...arg.getter];
+    messages[messages.length - 1] = {
+      ...messages[messages.length - 1],
       id: Date.now(),
-      sender: "ai",
       text: jsonResponse.message,
     };
-
-    arg.setter([...arg.getter, aiMessage]);
+    arg.setter(messages);
+    arg.setCanTrigger(false);
   } catch (err) {
     message.error(`An error occurred: ${err as Error}`);
-    console.error("Error:", err);
   }
 };
 
@@ -65,6 +66,7 @@ const ChatInterface = () => {
   const [input, setInput] = useState("");
   const [isOpen, setOpen] = useState(false);
   const [isMobile, setMobile] = useState(false);
+  const [canTrigger, setCanTrigger] = useState(false);
   const [downloadDetails, setDownloadDetails] = useState<DownloadDetails>({
     projectName: "",
     url: "",
@@ -84,12 +86,15 @@ const ChatInterface = () => {
 
   const handleSendMessage = useCallback(() => {
     if (input.trim()) {
-      const newMessage: Message = {
-        id: Date.now(),
-        sender: "user",
-        text: input,
-      };
-      setMessages((prev) => [...prev, newMessage]);
+      const newMessages: Message[] = [
+        {
+          id: Date.now(),
+          sender: "user",
+          text: input,
+        },
+        { id: Date.now(), sender: "ai", text: "" },
+      ];
+      setMessages((prev) => [...prev, ...newMessages]);
       setInput("");
       if (textareaRef.current) {
         textareaRef.current.style.height = "50px"; // Reset height after sending
@@ -100,7 +105,26 @@ const ChatInterface = () => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+      setCanTrigger(true);
       void handleSendMessage();
+    }
+  };
+
+  const handleImageClick = (e: React.MouseEvent<HTMLImageElement>) => {
+    e.preventDefault();
+    setCanTrigger(true);
+    void handleSendMessage();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    e.preventDefault();
+    setInput(e.target.value);
+  };
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (downloadDetails.url) {
+      void handleDownload(downloadDetails.url);
     }
   };
 
@@ -160,19 +184,22 @@ const ChatInterface = () => {
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
     const triggerChat = async () => {
       await trigger({
-        query: messages[messages.length - 1].text,
+        query: messages[messages.length - 2].text,
         getter: messages,
         setter: setMessages,
         downloadDetails: downloadDetails,
         setDownloadDetails: setDownloadDetails,
+        setCanTrigger: setCanTrigger,
       });
     };
-    if (messages.length && messages[messages.length - 1].sender === "user") {
+
+    if (messages.length && canTrigger) {
       void triggerChat();
     }
-  }, [messages, trigger, downloadDetails]);
+  }, [messages, downloadDetails, trigger, canTrigger]);
 
   // Manage textarea height
   useEffect(() => {
@@ -234,7 +261,7 @@ const ChatInterface = () => {
                   <p>Your project "{downloadDetails.projectName}" is ready!</p>
                   <Button
                     className="mt-5"
-                    onClick={() => void handleDownload(downloadDetails.url)}
+                    onClick={handleButtonClick}
                     style={{
                       backgroundColor: "var(--bg-primary)",
                       color: "var(--text-primary)",
@@ -277,7 +304,7 @@ const ChatInterface = () => {
               <p>Your project "{downloadDetails.projectName}" is ready!</p>
               <Button
                 className="mt-5"
-                onClick={() => void handleDownload(downloadDetails.url)}
+                onClick={handleButtonClick}
                 style={{
                   backgroundColor: "var(--bg-primary)",
                   color: "var(--text-primary)",
@@ -296,7 +323,7 @@ const ChatInterface = () => {
             <div className="w-[100%] m-auto">
               {messages.map((message, index) => (
                 <MessageItem
-                  key={message.id}
+                  key={index}
                   message={message}
                   isLastMessage={index === messages.length - 1}
                   isMutating={isMutating}
@@ -320,7 +347,7 @@ const ChatInterface = () => {
               cols={100}
               placeholder="Type your message..."
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={handleChange}
               onKeyDown={handleKeyDown}
             />
             <div className="flex mx-auto justify-end">
@@ -328,9 +355,7 @@ const ChatInterface = () => {
                 className="cursor-pointer w-[40px] h-auto bg-white rounded-full"
                 src={send}
                 alt="send message"
-                onClick={() => {
-                  void handleSendMessage();
-                }}
+                onClick={handleImageClick}
               />
             </div>
           </div>
