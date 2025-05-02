@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://forge.daimones.xyz/sitemap.xml
