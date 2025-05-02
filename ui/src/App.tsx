@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, lazy } from "react";
 import type { MenuProps } from "antd";
 import {
   SettingOutlined,
@@ -13,8 +13,9 @@ import { Squeeze as Hamburger } from "hamburger-react";
 import useSWRMutation from "swr/mutation";
 import { APIResponse, Message, DownloadDetails } from "./types";
 import { useTheme } from "./hooks";
-import { MessageItem } from "./components/MessageItem";
 import send from "./assets/send.png";
+
+const MessageItem = lazy(() => import("./components/MessageItem"));
 
 const chatWithAgent = async (
   url: string,

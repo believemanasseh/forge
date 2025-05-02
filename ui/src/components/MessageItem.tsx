@@ -3,7 +3,7 @@ import { RobotOutlined } from "@ant-design/icons";
 import { MessageItemProps } from "../types";
 import TypeIt from "typeit-react";
 
-export const MessageItem = memo(
+const MessageItem = memo(
   ({ message, isLastMessage, isMutating }: MessageItemProps) => {
     if (message.sender === "ai") {
       return (
@@ -32,3 +32,5 @@ export const MessageItem = memo(
     );
   }
 );
+
+export default MessageItem;
