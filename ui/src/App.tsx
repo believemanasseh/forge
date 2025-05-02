@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, lazy } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import type { MenuProps } from "antd";
 import {
   SettingOutlined,
@@ -13,9 +13,9 @@ import { Squeeze as Hamburger } from "hamburger-react";
 import useSWRMutation from "swr/mutation";
 import { APIResponse, Message, DownloadDetails } from "./types";
 import { useTheme } from "./hooks";
+import MessageItem from "./components/MessageItem";
 import send from "./assets/send.png";
-
-const MessageItem = lazy(() => import("./components/MessageItem"));
+import stop from "./assets/stop.png";
 
 const chatWithAgent = async (
   url: string,
@@ -29,16 +29,19 @@ const chatWithAgent = async (
       downloadDetails: DownloadDetails;
       setDownloadDetails: (arg: DownloadDetails) => void;
       setCanTrigger: (arg: boolean) => void;
+      abortController: React.RefObject<AbortController | null>;
     };
   }
 ) => {
   try {
+    arg.abortController.current = new AbortController();
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ query: arg.query }),
+      signal: arg.abortController.current.signal,
     });
     const jsonResponse = (await response.json()) as APIResponse;
 
@@ -57,8 +60,14 @@ const chatWithAgent = async (
     };
     arg.setter(messages);
     arg.setCanTrigger(false);
-  } catch (err) {
-    message.error(`An error occurred: ${err as Error}`);
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === "AbortError") {
+      console.log("Fetch aborted");
+    } else {
+      message.error(`An error occurred: ${err as Error}`);
+    }
+  } finally {
+    arg.abortController.current = null;
   }
 };
 
@@ -73,6 +82,7 @@ const ChatInterface = () => {
     url: "",
   });
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const abortController = useRef<AbortController | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const { trigger, isMutating } = useSWRMutation(
     `${import.meta.env.VITE_API_URL}/chat`,
@@ -115,6 +125,12 @@ const ChatInterface = () => {
     e.preventDefault();
     setCanTrigger(true);
     void handleSendMessage();
+  };
+
+  const handleStop = () => {
+    if (abortController.current) {
+      abortController.current.abort(); // Cancel the fetch request
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -194,6 +210,7 @@ const ChatInterface = () => {
         downloadDetails: downloadDetails,
         setDownloadDetails: setDownloadDetails,
         setCanTrigger: setCanTrigger,
+        abortController: abortController,
       });
     };
 
@@ -352,13 +369,23 @@ const ChatInterface = () => {
               onKeyDown={handleKeyDown}
             />
             <div className="flex mx-auto justify-end">
-              <img
-                className="cursor-pointer w-[40px] h-auto bg-white rounded-full"
-                src={send}
-                alt="send message"
-                onClick={handleImageClick}
-                loading="lazy"
-              />
+              {isMutating ? (
+                <img
+                  className="cursor-pointer w-[40px] h-auto bg-white rounded-full"
+                  src={stop}
+                  alt="stop message"
+                  onClick={handleStop}
+                  loading="lazy"
+                />
+              ) : (
+                <img
+                  className="cursor-pointer w-[40px] h-auto bg-white rounded-full"
+                  src={send}
+                  alt="send message"
+                  onClick={handleImageClick}
+                  loading="lazy"
+                />
+              )}
             </div>
           </div>
         </div>
