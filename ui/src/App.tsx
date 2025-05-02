@@ -357,6 +357,7 @@ const ChatInterface = () => {
                 src={send}
                 alt="send message"
                 onClick={handleImageClick}
+                loading="lazy"
               />
             </div>
           </div>
