@@ -1,12 +1,12 @@
-from http.client import OK
 from typing import Any
 
-import aiohttp
+from ollama import AsyncClient, ChatResponse, ResponseError
 from uagents import Context
 
 from src.config import get_config
 
 config = get_config()
+client = AsyncClient()
 
 
 async def call_llm(ctx: Context, content: str, role: str = "user") -> dict[str, Any]:
@@ -24,18 +24,12 @@ async def call_llm(ctx: Context, content: str, role: str = "user") -> dict[str, 
         dict[str, Any]: The JSON response from the LLM API containing the model's output.
 
     Raises:
-        aiohttp.ClientResponseError: If the API returns a non-200 status code.
-        aiohttp.ClientError: If there is a network error during the API request.
+        ResponseError: If the request could not be fulfilled.
 
     Example:
         >>> response = await call_llm("Create a new Flask project")
-        >>> print(response['choices'][0]['message']['content'])
+        >>> print(response)
     """
-    headers = {
-        "Authorization": f"Bearer {config.LLM_API_KEY}",
-        "Content-Type": "application/json",
-    }
-
     data = {
         "messages": [
             {
@@ -51,19 +45,10 @@ async def call_llm(ctx: Context, content: str, role: str = "user") -> dict[str, 
     }
 
     try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                config.LLM_API_URL, headers=headers, json=data
-            ) as response:
-                if response.status != OK:
-                    error_text = await response.text()
-                    raise aiohttp.ClientResponseError(
-                        response.request_info,
-                        response.history,
-                        status=response.status,
-                        message=error_text,
-                    )
-                return await response.json()
-    except aiohttp.ClientError as e:
-        ctx.logger.error(f"API request failed: {str(e)}")
-        raise
+        response: ChatResponse = await client.chat(
+            model=data["model"], messages=data["messages"]
+        )
+        return response.message.content
+    except ResponseError as e:
+        ctx.logger.error(f"LLM API call failed: {str(e)}")
+        raise ResponseError(f"Error: Failed to get response from LLM - {str(e)}") from e

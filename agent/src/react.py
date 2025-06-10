@@ -116,13 +116,13 @@ def parse_llm_response(response: str) -> dict[str, Any]:
     result = {}
 
     for line in lines:
-        if line.startswith("Thought:"):
-            result["thought"] = line[8:].strip()
-        elif line.startswith("Action:"):
-            result["action"] = line[7:].strip()
-        elif line.startswith("Action Args:"):
+        if line.strip().startswith("Thought:"):
+            result["thought"] = line.replace("Thought:", "", 1).strip()
+        elif line.strip().startswith("Action:"):
+            result["action"] = line.replace("Action:", "", 1).strip()
+        elif line.strip().startswith("Action Args:"):
             try:
-                result["action_args"] = json.loads(line[13:].strip())
+                result["action_args"] = json.loads(line.replace("Action Args:", "", 1))
                 result["project_name"] = result["action_args"].get("project_name")
                 result["template"] = result["action_args"].get("template")
                 result["package_manager"] = result["action_args"].get("package_manager")
@@ -135,8 +135,8 @@ def parse_llm_response(response: str) -> dict[str, Any]:
                 result["package_manager"] = (
                     "npm" if result["action"] == "scaffold_vite" else None
                 )
-        elif line.startswith("Response:"):
-            result["response"] = line[9:].strip()
+        elif line.strip().startswith("Response:"):
+            result["response"] = line.replace("Response:", "", 1).strip()
 
     return result
 
@@ -177,7 +177,7 @@ async def begin_react_loop(
             )
 
             ctx.logger.info("Parsing LLM response")
-            decision = parse_llm_response(response["choices"][0]["message"]["content"])
+            decision = parse_llm_response(response)
 
             ctx.logger.info(f"Thought: {decision.get('thought')}")
 
