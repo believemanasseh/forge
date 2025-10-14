@@ -337,7 +337,7 @@ const ChatInterface = () => {
       )}
       <div className="max-w-[100%] xs:overflow-y-auto xs:overflow-x-hidden">
         <div className="flex flex-col m-auto max-h-[100%] xs:w-[100%] sm:w-[50%]">
-          <div className="xs:h-[calc(100vh-100px)] m-auto xs:w-[90%] md:w-[100%] rounded-2xl p-5">
+          <div className="xs:h-[calc(82vh-100px)] m-auto xs:w-[90%] md:w-[100%] rounded-2xl p-5">
             <div className="w-[100%] m-auto">
               {messages.map((message, index) => (
                 <MessageItem
