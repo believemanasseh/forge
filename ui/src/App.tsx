@@ -200,7 +200,8 @@ const ChatInterface = () => {
   const menuProps = { items };
 
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatEndRef.current)
+      chatEndRef.current.scrollIntoView({ behavior: "smooth" });
 
     const triggerChat = async () => {
       await trigger({
@@ -335,27 +336,25 @@ const ChatInterface = () => {
           )}
         </div>
       )}
-      <div className="max-w-[100%] xs:overflow-y-auto xs:overflow-x-hidden">
-        <div className="flex flex-col m-auto max-h-[100%] xs:w-[100%] sm:w-[50%]">
-          <div className="xs:h-[calc(82vh-100px)] m-auto xs:w-[90%] md:w-[100%] rounded-2xl p-5">
-            <div className="w-[100%] m-auto">
-              {messages.map((message, index) => (
-                <MessageItem
-                  key={index}
-                  message={message}
-                  isLastMessage={index === messages.length - 1}
-                  isMutating={isMutating}
-                />
-              ))}
-              <div ref={chatEndRef} />
-            </div>
+      <div className="max-w-[100%] xs:h-[calc(83vh-100px)] md:h-[calc(90vh-100px)] xs:overflow-y-auto xs:overflow-x-hidden">
+        <div className="m-auto max-h-[100%] xs:w-[100%] sm:w-[50%]">
+          <div className="w-[100%] m-auto p-5">
+            {messages.map((message, index) => (
+              <MessageItem
+                key={index}
+                message={message}
+                isLastMessage={index === messages.length - 1}
+                isMutating={isMutating}
+              />
+            ))}
+            <div ref={chatEndRef} />
           </div>
           <div
-            className={`transition-all duration-300 ease-in-out m-[auto_auto_30px_auto] fixed xs:w-[100%] sm:w-[50%] md:w-[45%] lg:w-[50%] xl:w-[40%] ${
+            className={`z-10 transition-all duration-300 ease-in-out m-[auto_auto_30px_auto] fixed xs:w-[100%] sm:w-[50%] md:w-[45%] lg:w-[50%] xl:w-[40%] ${
               messages.length === 0
                 ? "top-[50%] translate-y-[-50%]"
                 : "xs:bottom-1 xl:bottom-5"
-            } bg-[--var(--bg-primary)] shadow-lg p-5 rounded-2xl border ${
+            } bg-[var(--bg-primary)] shadow-lg p-5 rounded-2xl border ${
               theme === "light" ? "border-none" : "border-white"
             }`}
           >
