@@ -49,7 +49,7 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | b
     nvm install 24 && \
     nvm use 24 && \
     corepack enable pnpm && corepack prepare pnpm@latest --activate && \
-    corepack enable yarn && corepack prepare yarn@latest --activate && \
+    corepack enable yarn && corepack prepare yarn@latest --activate 
 
 # --------------------
 # PHP & Composer & common PHP extensions

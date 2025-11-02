@@ -126,7 +126,7 @@ def scaffold_vite(ctx: Context, vite_config: ViteConfig) -> str | None:
         # Create app using Vite
         em_dashes = "--" if vite_config.package_manager == "npm" else ""
         subprocess.run(
-            f"{vite_config.package_manager} create vite{'@latest' if vite_config.package_manager == 'npm' else ''} {project_name} {em_dashes} --template {vite_config.template}",
+            f"no '' | {vite_config.package_manager} create vite{'@latest' if vite_config.package_manager == 'npm' else ''} {project_name} {em_dashes} --template {vite_config.template} --no-rolldown",
             shell=True,
             check=True,
             cwd=temp_dir,
