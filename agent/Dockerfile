@@ -85,7 +85,7 @@ FROM debian:12-slim AS runtime
 # Install ONLY runtime dependencies (no build-essential, no rustc, etc.)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget git procps \
-    python3 python3-pip locales \
+    python3 python3-pip locales python3.11-venv \
     # Ruby runtime dependencies
     libssl3 zlib1g libreadline8 libyaml-0-2 \
     libsqlite3-0 sqlite3 libxml2 libxslt1.1 \
