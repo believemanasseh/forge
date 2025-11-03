@@ -293,7 +293,7 @@ def scaffold_rails(ctx: Context, project_name: str = "myproject") -> str:
         # Create zip file
         zip_path = create_zip_file(ctx, temp_dir, project_name)
         directory = "/tmp"
-        final_zip_path = move_zip_file(ctx, ctx, zip_path, directory, project_name)
+        final_zip_path = move_zip_file(ctx, zip_path, directory, project_name)
         ctx.logger.info(f"Project zipped successfully: {final_zip_path}")
 
         s3_url = upload_to_s3(ctx, final_zip_path, project_name)
