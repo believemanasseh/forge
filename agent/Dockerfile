@@ -76,9 +76,11 @@ RUN curl https://mise.run | sh
 RUN echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
 SHELL ["/bin/bash", "-lc"]
 RUN mise use -g ruby@3 
-RUN gem install rails
+RUN gem install rails puma bootsnap propshaft importmap-rails turbo-rails \
+    stimulus-rails jbuilder solid_cache solid_queue solid_cable \
+    kamal bigdecimal
 ENV GEM_HOME="/root/.local/share/mise/installs/ruby/3.4.7/lib/ruby/gems/3.4.0"
-ENV PATH="$GEM_HOME/bin:/root/.local/share/mise/installs/ruby/3.4.7/bin:/root/.local/share/mise/shims:$PATH"
+ENV PATH="/root/.local/share/mise/installs/ruby/3.4.7/bin:$GEM_HOME/bin:/root/.local/share/mise/installs/ruby/3.4.7/bin:/root/.local/share/mise/shims:$PATH"
 
 FROM debian:12-slim AS runtime
 
@@ -86,6 +88,7 @@ FROM debian:12-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget git procps \
     python3 python3-pip locales python3.11-venv \
+    build-essential gcc make  \
     # Ruby runtime dependencies
     libssl3 zlib1g libreadline8 libyaml-0-2 \
     libsqlite3-0 sqlite3 libxml2 libxslt1.1 \
@@ -124,10 +127,10 @@ COPY --from=builder /usr/local/bin/composer /usr/local/bin/composer
 COPY --from=builder /root/.local/share/mise /root/.local/share/mise
 COPY --from=builder /root/.local/bin/mise /root/.local/bin/mise
 COPY --from=builder /root/.config/mise /root/.config/mise
-
 ENV MISE_RUBY_VERSION=3.4.7
-ENV PATH="/root/.local/share/mise/installs/ruby/${MISE_RUBY_VERSION}/bin:/root/.local/share/mise/shims:/root/.local/bin:${PATH}"
-
+ENV GEM_HOME="/root/.local/share/mise/installs/ruby/${MISE_RUBY_VERSION}/lib/ruby/gems/3.4.0"
+ENV GEM_PATH="${GEM_HOME}"
+ENV PATH="${GEM_HOME}/bin:/root/.local/share/mise/installs/ruby/${MISE_RUBY_VERSION}/bin:/root/.local/share/mise/shims:/root/.local/bin:${PATH}"
 # Add mise activation to bashrc
 RUN echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
 
