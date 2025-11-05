@@ -76,11 +76,7 @@ RUN curl https://mise.run | sh
 RUN echo 'eval "$(~/.local/bin/mise activate bash)"' >> ~/.bashrc
 SHELL ["/bin/bash", "-lc"]
 RUN mise use -g ruby@3 
-RUN gem install rails puma bootsnap propshaft importmap-rails turbo-rails \
-    stimulus-rails jbuilder solid_cache solid_queue solid_cable \
-    kamal bigdecimal
-ENV GEM_HOME="/root/.local/share/mise/installs/ruby/3.4.7/lib/ruby/gems/3.4.0"
-ENV PATH="/root/.local/share/mise/installs/ruby/3.4.7/bin:$GEM_HOME/bin:/root/.local/share/mise/installs/ruby/3.4.7/bin:/root/.local/share/mise/shims:$PATH"
+RUN gem install rails
 
 FROM debian:12-slim AS runtime
 
